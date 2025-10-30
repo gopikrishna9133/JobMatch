@@ -10,7 +10,7 @@ def _ensure_path_exists(path: str):
         os.makedirs(directory, exist_ok=True)
 
 def create_app():
-    app = Flask(__name__, static_folder="static", template_folder="templates")
+    app = Flask(__name__, static_folder="application/static", template_folder="application/templates")
     app.config.from_object(get_config())
 
     # Init extensions
