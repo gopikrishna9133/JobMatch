@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JobMatch — New Applications</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com/3.4.5"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    .chip{display:inline-flex;align-items:center;gap:.35rem;border-radius:999px;padding:.15rem .55rem;font-size:.75rem;font-weight:600}
+    .chip-open{background:#eafaf0;color:#0b7a27}
+    .chip-closed{background:#feeceb;color:#b42318}
+    .chip-applied{background:#eef4ff;color:#1e40af}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:.75rem;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .card-hover:hover{box-shadow:0 6px 18px rgba(16,24,40,.08)}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;font-weight:600;border-radius:.5rem}
+
+    .job-card{display:flex;flex-direction:column;height:100%}
+    .job-card-content{flex:1 1 auto}
+
+    .flash {
+      position: relative;
+      border-radius: .5rem;
+      padding: .75rem 2.25rem .75rem .9rem;
+      border: 1px solid transparent;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .flash.success { background:#ecfdf5; border-color:#a7f3d0; color:#065f46; }
+    .flash.info    { background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a; }
+    .flash.warning { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .flash.danger  { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+    .flash-close {
+      position:absolute; right:.5rem; top:.35rem;
+      background:transparent; border:0; font-size:1rem; line-height:1;
+      color:inherit; opacity:.7; cursor:pointer;
+    }
+    .flash-close:hover { opacity:1; }
+  </style>
+</head>
+<body class="bg-gray-50 font-[Inter] text-gray-900">
+  <!-- NAV -->
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="{{ url_for('seeker_dashboard') }}" class="flex items-center gap-2">
+        <img src="{{ url_for('static', filename='img/logo_job.png') }}" class="h-8 w-auto" alt="JobMatch">
+        <span class="text-xl font-semibold">JobMatch</span>
+      </a>
+      
+      <div class="flex items-center gap-2">
+        <a href="{{ url_for('seeker_dashboard') }}" class="btn px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md">🏠 Dashboard</a>
+        <a href="{{ url_for('logout') }}" class="btn px-3 py-2 bg-red-600 text-white hover:bg-red-700 rounded-md">↪ Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash messages -->
+  {% with msgs = get_flashed_messages(with_categories=True) %}
+    {% if msgs %}
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" id="flash-wrap">
+        {% for cat, msg in msgs %}
+          <div class="flash {{ cat }} mb-2">
+            {{ msg }}
+            <button class="flash-close" aria-label="Close" onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      </div>
+      <script>
+        setTimeout(()=>{
+          document.querySelectorAll('#flash-wrap .flash').forEach(el=>{
+            el.style.opacity='0';
+            el.style.transform='translateY(-6px)';
+            setTimeout(()=>el.remove(), 300);
+          });
+        }, 3500);
+      </script>
+    {% endif %}
+  {% endwith %}
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div class="flex items-end justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-2xl font-semibold">New Applications</h1>
+        <p class="text-gray-600">Browse open roles. We’ll disable apply if a job is closed or you already applied.</p>
+      </div>
+
+      <form method="GET" action="{{ url_for('job_listings') }}" class="w-full md:w-auto grid md:grid-cols-4 gap-2">
+        <input type="text" name="q" value="{{ request.args.get('q','') }}" placeholder="Search title, company, location…" class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        <select name="employment_type" class="px-3 py-2 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <option value="">All types</option>
+          {% set et = request.args.get('employment_type') %}
+          <option value="Full-time" {{ 'selected' if et=='Full-time' else '' }}>Full-time</option>
+          <option value="Part-time" {{ 'selected' if et=='Part-time' else '' }}>Part-time</option>
+          <option value="Contract"  {{ 'selected' if et=='Contract'  else '' }}>Contract</option>
+          <option value="Internship" {{ 'selected' if et=='Internship' else '' }}>Internship</option>
+        </select>
+        <button class="btn px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">🔎 Filter</button>
+        <a href="{{ url_for('job_listings') }}" class="btn px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">Reset</a>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {% if jobs|length == 0 %}
+        <div class="text-gray-500">No jobs found.</div>
+      {% endif %}
+
+      <script>
+        window.JOBS = {};
+      </script>
+
+      {% for job in jobs %}
+        {% set is_open = (job.is_open if job.is_open is not none else 1) %}
+        {% set already = (job.id in applied_ids) %}
+        <div class="card card-hover p-4 job-card" role="button" onclick="openJobDetail({{ job.id }})">
+          <div class="job-card-content">
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="font-semibold text-lg">{{ job.job_title }}</div>
+                <div class="text-sm text-gray-600">{{ job.company_name }}</div>
+                <div class="text-sm text-gray-600">{{ job.location }} • {{ job.employment_type }}</div>
+                <div class="mt-1 text-sm text-gray-600">Salary: {{ job.salary_from or '—' }}–{{ job.salary_to or '—' }}</div>
+              </div>
+              <div class="flex flex-col items-end gap-1">
+                <span class="chip {{ 'chip-open' if is_open else 'chip-closed' }}">{{ 'Open' if is_open else 'Closed' }}</span>
+                {% if already %}
+                  <span class="chip chip-applied">Applied</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Description preview -->
+            <div class="mt-3 text-sm text-gray-700 line-clamp-4">
+              {{ job.job_description[:240] ~ ('…' if job.job_description|length > 240 else '') }}
+            </div>
+
+            <!-- Responsibilities preview -->
+            {% if job.key_responsibilities %}
+              <div class="mt-3">
+                <div class="text-sm font-medium">Key responsibilities</div>
+                <ul class="text-sm text-gray-700 list-disc ml-5 mt-1 space-y-0.5">
+                  {% for line in job.key_responsibilities.splitlines()[:4] %}
+                    {% if line.strip() %}<li>{{ line }}</li>{% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-4 flex items-center gap-2" onclick="event.stopPropagation();">
+            <form method="POST" action="{{ url_for('apply_job', job_post_id=job.id) }}" class="apply-form" data-job-id="{{ job.id }}">
+              <button
+                type="submit"
+                class="btn px-4 py-2 rounded-md {{ 'bg-emerald-600 text-white hover:bg-emerald-700' if (is_open and not already) else 'bg-gray-200 text-gray-500 cursor-not-allowed' }}"
+                {{ 'disabled' if (not is_open or already) else '' }}>
+                {{ 'Apply' if (is_open and not already) else ( 'Applied' if already else 'Closed') }}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <script>
+          /* expose record to the details modal */
+          (function(){
+            window.JOBS[{{ job.id }}] = {
+              id: {{ job.id }},
+              title: {{ job.job_title|tojson }},
+              company: {{ job.company_name|tojson }},
+              location: {{ job.location|tojson }},
+              type: {{ job.employment_type|tojson }},
+              salary_from: {{ (job.salary_from if job.salary_from is not none else '')|tojson }},
+              salary_to: {{ (job.salary_to if job.salary_to is not none else '')|tojson }},
+              description: {{ (job.job_description or '')|tojson }},
+              responsibilities: {{ (job.key_responsibilities or '')|tojson }},
+              is_open: {{ (1 if is_open else 0) }},
+              already: {{ (1 if already else 0) }}
+            };
+          })();
+        </script>
+      {% endfor %}
+    </div>
+  </main>
+
+  <!-- Job Details Modal -->
+  <div id="jobModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[85vh] overflow-hidden">
+      <div class="relative px-4 py-3 border-b">
+        <h3 id="jobModalTitle" class="font-semibold text-center">Job Details</h3>
+        <button class="absolute right-3 top-2 bg-red-600 text-white rounded-md px-3 py-1 hover:bg-red-700"
+                onclick="closeJobModal()">✕</button>
+      </div>
+      <div id="jobModalBody" class="p-4 overflow-y-auto max-h-[75vh]">
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script>
+    const jobModal = document.getElementById('jobModal');
+    const jobModalTitle = document.getElementById('jobModalTitle');
+    const jobModalBody = document.getElementById('jobModalBody');
+
+    function openJobDetail(id){
+      const j = (window.JOBS || {})[id];
+      if(!j){ return; }
+      jobModalTitle.textContent = j.title + ' — ' + j.company;
+      const canApply = (j.is_open && !j.already);
+      jobModalBody.innerHTML = `
+        <div class="space-y-3">
+          <div class="text-sm text-gray-600">${j.location} • ${j.type}</div>
+          <div class="text-sm text-gray-600">Salary: ${(j.salary_from||'—')}–${(j.salary_to||'—')}</div>
+          <div>
+            <div class="font-semibold mb-1">Description</div>
+            <div class="text-sm text-gray-800 whitespace-pre-line">${j.description || '—'}</div>
+          </div>
+          <div>
+            <div class="font-semibold mb-1">Key Responsibilities</div>
+            <div class="text-sm text-gray-800 whitespace-pre-line">${j.responsibilities || '—'}</div>
+          </div>
+          <div class="pt-2">
+            <button type="button"
+                    class="btn px-4 py-2 rounded-md ${ canApply ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed' }"
+                    ${ canApply ? '' : 'disabled' }
+                    onclick="applyById(${j.id})">
+              ${ canApply ? 'Apply' : (j.already ? 'Applied' : 'Closed') }
+            </button>
+          </div>
+        </div>
+      `;
+      jobModal.classList.remove('hidden');
+    }
+    function closeJobModal(){ jobModal.classList.add('hidden'); }
+
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ closeJobModal(); } });
+    function applyById(jobId){
+      const form = document.querySelector(`form.apply-form[data-job-id="${jobId}"]`);
+      if(!form) return;
+      const btn  = form.querySelector('button[type="submit"]');
+      if (btn && btn.disabled) return;
+      form.submit();
+    }
+  </script>
+</body>
+</html>

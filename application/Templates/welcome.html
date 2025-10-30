@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome • JobMatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+  <style>
+    .hero {
+      background-image:
+        linear-gradient(rgba(17,24,39,.4), rgba(17,24,39,.6)),
+        url("{{ url_for('static', filename='img/welcome.jpg') }}");
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      min-height: 100vh; /* full screen */
+    }
+    .focus-ring:focus-visible {
+      outline: 2px solid #1d4ed8;
+      outline-offset: 3px;
+      border-radius: .5rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 font-[Inter]">
+  <!-- NAV -->
+  <header class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20">
+    <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="{{ url_for('welcome') }}" class="flex items-center gap-2 focus-ring">
+        <img src="{{ url_for('static', filename='img/logo_job.png') }}" alt="JobMatch logo" class="h-8 w-8"/>
+        <span class="text-lg font-semibold text-gray-900">JobMatch</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="{{ url_for('login') }}" class="focus-ring px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Log in</a>
+        <a href="{{ url_for('register') }}" class="focus-ring px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Sign up</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO (headline + ctas + 3 cards) -->
+  <section class="hero text-white flex items-center justify-center relative">
+    <div class="absolute inset-0 bg-black/40"></div> <!-- overlay for readability -->
+
+    <div class="relative z-10 w-full">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 sm:pt-24">
+        <h1 class="text-4xl sm:text-6xl font-bold mb-4">Find your next job faster.</h1>
+        <p class="text-base sm:text-lg text-gray-100 mb-8">
+          Smart matching between job seekers and employers — simple, fast, and focused.
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="{{ url_for('login') }}"
+             class="focus-ring inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-md bg-white text-gray-900 hover:bg-gray-100 shadow-md">
+            <i class="fas fa-right-to-bracket mr-2"></i> Log in
+          </a>
+          <a href="{{ url_for('register') }}"
+             class="focus-ring inline-flex items-center justify-center px-6 py-3 text-sm font-semibold rounded-md bg-blue-600 hover:bg-blue-700 shadow-md">
+            <i class="fas fa-user-plus mr-2"></i> Create account
+          </a>
+        </div>
+
+        <!-- 3 value cards ON the hero image -->
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+          <div class="backdrop-blur-sm bg-white/80 p-5 rounded-lg shadow border border-white/60">
+            <div class="text-xl mb-2">👤</div>
+            <h3 class="font-semibold text-gray-900">For Job Seekers</h3>
+            <p class="mt-1 text-gray-700 text-sm">
+              Create a profile, upload your resume, and apply in one click. Track your application status in a clean dashboard.
+            </p>
+          </div>
+
+          <div class="backdrop-blur-sm bg-white/80 p-5 rounded-lg shadow border border-white/60">
+            <div class="text-xl mb-2">🏢</div>
+            <h3 class="font-semibold text-gray-900">For Employers</h3>
+            <p class="mt-1 text-gray-700 text-sm">
+              Post jobs, filter candidates, and manage active applications with less noise and more signal.
+            </p>
+          </div>
+
+          <div class="backdrop-blur-sm bg-white/80 p-5 rounded-lg shadow border border-white/60">
+            <div class="text-xl mb-2">🤖</div>
+            <h3 class="font-semibold text-gray-900">AI Assistant</h3>
+            <p class="mt-1 text-gray-700 text-sm">
+              Get quick tips on resumes and interviews from our built-in chatbot when you need it.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+      <div class="md:col-span-2">
+        <h2 class="text-2xl font-bold text-gray-900">About JobMatch</h2>
+        <p class="mt-3 text-gray-700">
+          JobMatch connects people and opportunities through intelligent matching. Whether you’re seeking your next role or your next hire, our tools make it fast to find the right fit.
+        </p>
+        <ul class="mt-4 text-gray-700 space-y-2 text-sm list-disc ml-5">
+          <li>Create a profile and upload your resume safely.</li>
+          <li>Apply to jobs and track status in real time.</li>
+          <li>Employers review, shortlist, and respond faster.</li>
+        </ul>
+        <p class="mt-4 text-gray-600 text-sm">
+          <i class="fas fa-lock mr-2 text-green-600"></i>We respect your data. Resumes are only visible to you and the companies you apply to.
+        </p>
+        <div class="mt-6 flex gap-3">
+          <a href="{{ url_for('login') }}" class="focus-ring px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Log in</a>
+          <a href="{{ url_for('register') }}" class="focus-ring px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Create account</a>
+        </div>
+      </div>
+      <div class="flex items-center justify-center">
+        <img src="{{ url_for('static', filename='img/logo_job.png') }}" alt="JobMatch logo" class="h-28 w-28"/>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-gray-200">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-gray-600">
+      © 2025 JobMatch · Your Job is our priority · <a href="#" class="underline">Privacy</a> · <a href="#" class="underline">Contact</a>
+    </div>
+  </footer>
+</body>
+</html>

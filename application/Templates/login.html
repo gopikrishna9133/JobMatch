@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In | JobMatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root{
+      --brand:#4f46e5; --brand2:#7c3aed;
+      --card-bg: rgba(255,255,255,.92);
+      --shadow: 0 20px 40px rgba(0,0,0,.15);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:#111827; background:#f3f4f6; display:flex; flex-direction:column; overflow:auto;
+    }
+    .nav{
+      height:64px; display:flex; align-items:center; justify-content:space-between;
+      padding:0 24px; z-index:2;
+      background:rgba(255,255,255,.75); backdrop-filter:saturate(160%) blur(8px);
+      border-bottom:1px solid rgba(0,0,0,.06);
+    }
+    .brand{display:flex; align-items:center; gap:10px; font-weight:600; text-decoration:none; color:inherit}
+    .brand img{height:28px}
+    .nav a.link{font-size:14px; color:#4f46e5; text-decoration:none}
+    .nav a.link:hover{text-decoration:underline}
+
+    .hero{
+      position:relative; flex:1; display:flex; align-items:center; justify-content:center;
+      overflow:hidden; padding:48px 16px;
+    }
+    .hero::before{
+      content:""; position:absolute; inset:0;
+      background:url("{{ url_for('static', filename='img/auth_bg.jpg') }}") center/cover no-repeat fixed;
+      transform:scale(1.02);
+    }
+    .hero::after{
+      content:""; position:absolute; inset:0;
+      background:linear-gradient(180deg, rgba(255,255,255,.25) 0%, rgba(17,24,39,.55) 100%);
+    }
+
+    .card{
+      position:relative; z-index:1; width:min(540px, 92vw);
+      background:var(--card-bg); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:28px 28px 24px; margin:0 auto;
+    }
+    @media (min-width:640px){ .card{padding:36px 40px;} }
+
+    .card-header{display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:18px}
+    .title{font-size:clamp(22px, 2.2vw, 28px); font-weight:800}
+    .subtitle{font-size:14px; color:#4b5563}
+
+    label{display:block; font-size:14px; color:#374151; margin:10px 0 6px}
+    /* include type="text" because WTForms often renders EmailField as text */
+    input[type="email"], input[type="text"], input[type="password"]{
+      width:100%; height:44px; border:1px solid #d1d5db; border-radius:10px;
+      padding:0 44px 0 40px; font-size:14px; background:#fff;
+      outline:none; transition:border .15s, box-shadow .15s;
+    }
+    input:focus{border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.15)}
+    .field{position:relative}
+    .icon{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#6b7280}
+    .toggle{position:absolute; right:10px; top:50%; transform:translateY(-50%); color:#6b7280; background:transparent; border:0; cursor:pointer}
+
+    .meta{display:flex; align-items:center; justify-content:space-between; margin:10px 0 16px}
+    .meta a{font-size:13px; color:#4f46e5; text-decoration:none}
+    .meta a:hover{text-decoration:underline}
+
+    .cta{
+      width:100%; height:46px; border:0; border-radius:10px; cursor:pointer;
+      color:#fff; font-weight:600; font-size:15px;
+      background:linear-gradient(90deg, var(--brand), var(--brand2));
+      box-shadow:0 8px 20px rgba(99,102,241,.25);
+      transition:transform .06s ease;
+    }
+    .cta:active{transform:translateY(1px)}
+    .footer-link{margin-top:14px; text-align:center; font-size:14px; color:#4b5563}
+    .footer-link a{color:#4f46e5; text-decoration:none}
+    .footer-link a:hover{text-decoration:underline}
+
+    .flash{padding:10px 12px; border-radius:10px; font-size:14px; margin-bottom:12px}
+    .success{background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0}
+    .danger{background:#fef2f2; color:#991b1b; border:1px solid #fecaca}
+    .warning{background:#fffbeb; color:#92400e; border:1px solid #fde68a}
+    .info{background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe}
+  </style>
+</head>
+<body>
+  <div class="nav">
+    <a href="#" class="brand" onclick="location.reload(); return false;">
+      <img src="{{ url_for('static', filename='img/logo_job.png') }}" alt="JobMatch">
+      <span>JobMatch</span>
+    </a>
+    {% if current_user.is_authenticated %}
+      {% if current_user.role == 'company' %}
+        <a class="link" href="{{ url_for('company_dashboard') }}">Dashboard</a>
+      {% else %}
+        <a class="link" href="{{ url_for('seeker_dashboard') }}">Dashboard</a>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <section class="hero">
+    <div class="card">
+      <div class="card-header">
+        <div class="title">Welcome Back</div>
+        <div class="subtitle">Sign in to access your JobMatch account</div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ 'success' if category=='success' else 'warning' if category=='warning' else 'info' if category=='info' else 'danger' }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST" novalidate>
+        {{ form.hidden_tag() }}
+
+        <label>Email Address</label>
+        <div class="field">
+          <i class="fa-regular fa-envelope icon"></i>
+          {{ form.email(placeholder="your@email.com", autocomplete="username", id="email") }}
+        </div>
+
+        <label style="margin-top:12px;">Password</label>
+        <div class="field">
+          <i class="fa-solid fa-lock icon"></i>
+          {{ form.password(placeholder="••••••••", autocomplete="current-password", id="password") }}
+          <button type="button" class="toggle" aria-label="Show password" onclick="togglePw()">
+            <i id="pwIcon" class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+
+        <div class="meta">
+          <label style="font-size:13px; color:#4b5563;">
+            <input type="checkbox" style="transform:translateY(1px); margin-right:6px;"> Remember me
+          </label>
+          <a href="#">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="cta">Sign In</button>
+      </form>
+
+      <div class="footer-link">
+        Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a>
+      </div>
+    </div>
+
+    <!-- Forgot Password Modal -->
+<div id="fpModal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.35); z-index:60;">
+  <div style="width:min(520px,92vw); background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; position:relative;">
+    <button type="button" aria-label="Close" onclick="fpClose()"
+            style="position:absolute; right:12px; top:10px; border:0; background:transparent; font-size:20px; cursor:pointer; color:#dc2626;">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <div class="card-header" style="margin-bottom:12px">
+      <div class="title">Reset Password</div>
+      <div class="subtitle" id="fpSubtitle">Enter your email to continue</div>
+    </div>
+
+    <div id="fpAlert" class="flash danger" style="display:none; margin-bottom:10px;"></div>
+
+    <!-- email -->
+    <form id="fpFormEmail" onsubmit="fpCheck(); return false;">
+      <label>Email Address</label>
+      <div class="field">
+        <i class="fa-regular fa-envelope icon"></i>
+        <input id="fpEmail" type="email" placeholder="your@email.com" autocomplete="email" required/>
+      </div>
+      <button class="cta" style="margin-top:14px;" type="submit">Next</button>
+    </form>
+
+    <!-- new password -->
+    <form id="fpFormReset" onsubmit="fpSave(); return false;" style="display:none;">
+      <div class="subtitle" id="fpRoleNote" style="margin-bottom:10px;"></div>
+
+      <label>New Password</label>
+      <div class="field">
+        <i class="fa-solid fa-lock icon"></i>
+        <input id="fpNew" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
+        <button type="button" class="toggle" aria-label="Show password" onclick="fpTogglePw()">
+          <i id="fpPwIcon" class="fa-regular fa-eye"></i>
+        </button>
+      </div>
+
+      <label style="margin-top:12px;">Confirm Password</label>
+      <div class="field">
+        <i class="fa-solid fa-lock icon"></i>
+        <input id="fpConfirm" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
+      </div>
+      
+      <button class="cta" style="margin-top:14px;" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+
+  </section>
+
+  <script>
+    function togglePw(){
+      const input=document.getElementById('password');
+      const icon=document.getElementById('pwIcon');
+      if(input.type==='password'){ input.type='text'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+      else{ input.type='password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+    }
+
+    const fp = document.getElementById('fpModal');
+  const fpAlert = document.getElementById('fpAlert');
+  const fpSubtitle = document.getElementById('fpSubtitle');
+  const fpRoleNote = document.getElementById('fpRoleNote');
+  const formEmail = document.getElementById('fpFormEmail');
+  const formReset = document.getElementById('fpFormReset');
+  const fpEmail = document.getElementById('fpEmail');
+  const fpNew = document.getElementById('fpNew');
+  const fpConfirm = document.getElementById('fpConfirm');
+
+  // Open/close
+  function fpOpen(){ 
+    fp.style.display='flex';
+    fpAlert.style.display='none';
+    formEmail.style.display='block';
+    formReset.style.display='none';
+    fpSubtitle.textContent = 'Enter your email to continue';
+    fpEmail.value=''; fpNew.value=''; fpConfirm.value='';
+    setTimeout(()=>fpEmail.focus(), 50);
+  }
+  function fpClose(){ fp.style.display='none'; }
+  function fpError(msg){ fpAlert.textContent = msg; fpAlert.className='flash danger'; fpAlert.style.display='block'; }
+  function fpInfo(msg){ fpAlert.textContent = msg; fpAlert.className='flash info'; fpAlert.style.display='block'; }
+
+  // Hook the existing "Forgot password?" link
+  document.querySelector('.meta a[href="#"]')?.addEventListener('click', (e)=>{
+    e.preventDefault(); fpOpen();
+  });
+
+  //  Check email
+  async function fpCheck(){
+    fpAlert.style.display='none';
+    const email = (fpEmail.value||'').trim().toLowerCase();
+    if(!email) return fpError('Please enter an email.');
+    const body = new FormData(); body.append('email', email);
+    try{
+      const res = await fetch('/api/forgot/check', { method:'POST', body });
+      const data = await res.json();
+      if(!data.ok) return fpError(data.error || 'Error checking email');
+
+      if(!data.exists) return fpError('Email not found. Double-check or register a new account.');
+      // Found → move to reset step
+      formEmail.style.display='none';
+      formReset.style.display='block';
+      formReset.dataset.email = email;
+      fpSubtitle.textContent = 'Set a new password';
+      fpRoleNote.textContent = data.role === 'company' ? 'Account type: Employer' : 'Account type: Job Seeker';
+      setTimeout(()=>fpNew.focus(), 50);
+    }catch(e){ fpError('Network error while checking email.'); }
+  }
+
+  //  Save
+  async function fpSave(){
+    fpAlert.style.display='none';
+    const email = formReset.dataset.email || '';
+    const pw = fpNew.value, cf = fpConfirm.value;
+    const body = new FormData();
+    body.append('email', email);
+    body.append('new_password', pw);
+    body.append('confirm_password', cf);
+
+    try{
+      const res = await fetch('/api/forgot/reset', { method:'POST', body });
+      const data = await res.json();
+      if(!data.ok) return fpError(data.error || 'Could not update password.');
+      fpInfo('Password updated. You can now sign in with your new password.');
+      setTimeout(()=>{ fpClose(); }, 1200);
+    }catch(e){ fpError('Network error while saving new password.'); }
+  }
+
+  // Eye toggle ONLY on new password
+  function fpTogglePw(){
+    const icon = document.getElementById('fpPwIcon');
+    if(fpNew.type==='password'){ fpNew.type='text'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+    else{ fpNew.type='password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+  }
+
+  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') fpClose(); });
+  </script>
+</body>
+</html>

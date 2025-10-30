@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JobMatch — Seeker Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+  <style>
+    .popup{display:none;position:fixed;inset:0;background-color:rgba(0,0,0,.5);z-index:1000}
+    .popup-card{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:14px;box-shadow:0 24px 60px rgba(0,0,0,.25);width:min(640px,94vw);max-height:84vh;overflow:auto}
+    .popup-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e5e7eb;padding:14px 18px}
+    .popup-body{padding:18px}
+    .close-x{font-size:22px;cursor:pointer;color:#ef4444}
+    .close-x:hover{color:#dc2626}
+    .tab-btn{border:1px solid transparent}
+    .tab-accepted{color:#166534;background:#dcfce7;border-color:#bbf7d0}
+    .tab-rejected{color:#991b1b;background:#fee2e2;border-color:#fecaca}
+    .tab-under{color:#92400e;background:#fef3c7;border-color:#fde68a}
+    .tab-accepted.active{color:#fff;background:#16a34a;border-color:#15803d}
+    .tab-rejected.active{color:#fff;background:#dc2626;border-color:#b91c1c}
+    .tab-under.active{color:#fff;background:#f59e0b;border-color:#d97706}
+    .muted{color:#6b7280}
+
+    /* Flash styles */
+    .flash {
+      position: relative;
+      border-radius: .5rem;
+      padding: .75rem 2.25rem .75rem .9rem;
+      border: 1px solid transparent;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .flash.success { background:#ecfdf5; border-color:#a7f3d0; color:#065f46; }
+    .flash.info    { background:#eff6ff; border-color:#bfdbfe; color:#1e3a8a; }
+    .flash.warning { background:#fffbeb; border-color:#fde68a; color:#92400e; }
+    .flash.danger  { background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+    .flash-close {
+      position:absolute; right:.5rem; top:.35rem;
+      background:transparent; border:0; font-size:1rem; line-height:1;
+      color:inherit; opacity:.7; cursor:pointer;
+    }
+    .flash-close:hover { opacity:1; }
+  </style>
+</head>
+<body class="bg-gray-50 font-[Inter] text-gray-900">
+  <div class="min-h-screen flex flex-col">
+    <!-- NAV -->
+  <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2">
+        <img src="{{ url_for('static', filename='img/logo_job.png') }}" class="h-8 w-auto" alt="JobMatch">
+        <span class="text-xl font-semibold">JobMatch</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="{{ url_for('resources') }}" class="btn px-3 py-2 bg-blue-500 text-white hover:bg-blue-800 rounded-md">
+          <span class="btn-icon">📘</span> Resources
+        </a>
+        <a href="{{ url_for('chatbot') }}" class="btn px-3 py-2 bg-purple-500 text-white hover:bg-purple-800 rounded-md">
+          <span class="btn-icon">🤖</span> Chatbot AI
+        </a>
+        <a href="{{ url_for('profile') }}" class="btn px-3 py-2 bg-gray-500 text-white hover:bg-gray-800 rounded-md">
+          <span class="btn-icon">👤</span> Profile
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn px-3 py-2 bg-red-500 text-white hover:bg-red-800 rounded-md">
+          <span class="btn-icon">↪</span> Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+    <!-- Utility bar (New Application) -->
+    <div class="bg-white/70 backdrop-blur border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between">
+          <h1 class="text-2xl font-semibold text-gray-900">Job Application Dashboard</h1>
+          <button id="newAppBtn" class="rounded-md bg-teal-600 px-4 py-2 text-white hover:bg-teal-700 flex items-center space-x-2 text-sm">
+            <i class="fas fa-rocket"></i>
+            <span>New Application</span>
+          </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="flex-1 overflow-hidden">
+      <div class="py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+
+          <!-- Status tabs -->
+          <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex flex-wrap items-center gap-2">
+              <button id="tab-accepted" class="tab-btn tab-accepted active inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium">
+                <i class="fas fa-check-circle mr-2"></i> Accepted
+              </button>
+              <button id="tab-rejected" class="tab-btn tab-rejected inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium">
+                <i class="fas fa-times-circle mr-2"></i> Rejected
+              </button>
+              <button id="tab-under" class="tab-btn tab-under inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium">
+                <i class="fas fa-clock mr-2"></i> Under Review
+              </button>
+            </div>
+
+            <!-- Panels -->
+            <div class="mt-5">
+              <div id="panel-accepted">
+                <ul id="accepted-applications" class="ml-1 space-y-2 text-sm text-gray-800"></ul>
+              </div>
+              <div id="panel-rejected" class="hidden">
+                <ul id="rejected-applications" class="ml-1 space-y-2 text-sm text-gray-800"></ul>
+              </div>
+              <div id="panel-under" class="hidden">
+                <ul id="under-review-applications" class="ml-1 space-y-2 text-sm text-gray-800"></ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flash messages -->
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="mt-6" id="flash-wrap">
+                {% for category, message in messages %}
+                  <div class="flash {{ category }} mb-3">
+                    {{ message }}
+                    <button class="flash-close" aria-label="Close" onclick="this.parentElement.remove()">✕</button>
+                  </div>
+                {% endfor %}
+              </div>
+              <script>
+                // Auto-dismiss after 4s
+                setTimeout(()=>{
+                  document.querySelectorAll('#flash-wrap .flash').forEach(el=>{
+                    el.style.opacity='0';
+                    el.style.transform='translateY(-6px)';
+                    setTimeout(()=>el.remove(), 300);
+                  });
+                }, 4000);
+              </script>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Details Modal -->
+    <div id="jobModal" class="popup">
+      <div class="popup-card">
+        <div class="popup-header">
+          <div class="flex items-center">
+            <i id="jobModalIcon" class="fas fa-briefcase text-gray-500 mr-2"></i>
+            <h3 id="jobModalTitle" class="text-lg font-semibold text-gray-900">Job Title</h3>
+          </div>
+          <span class="close-x" id="jobModalClose">&times;</span>
+        </div>
+        <div class="popup-body">
+          <div class="text-sm grid gap-1">
+            <div><span class="muted">Company:</span> <span id="jobModalCompany">—</span></div>
+            <div><span class="muted">Applied:</span> <span id="jobModalApplied">—</span></div>
+            <div><span class="muted">Status:</span> <span id="jobModalStatus" class="font-medium">—</span></div>
+          </div>
+
+          <div class="mt-4">
+            <h4 class="font-semibold text-gray-900 mb-1">Job Description</h4>
+            <div id="jobModalDesc" class="text-gray-700 leading-relaxed whitespace-pre-line">—</div>
+          </div>
+
+          <div class="mt-4">
+            <h4 class="font-semibold text-gray-900 mb-1">Key Responsibilities</h4>
+            <div id="jobModalResp" class="text-gray-700 leading-relaxed whitespace-pre-line">—</div>
+          </div>
+
+          <div id="offerCtaWrap" class="mt-5 hidden">
+            <a id="offerBtn" href="#" class="inline-flex items-center px-4 py-2 rounded-md bg-green-600 text-white hover:bg-green-700">
+              <i class="fas fa-file-signature mr-2"></i> Get Offer Letter
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="resumePopup" class="popup" style="display:none;">
+      <div class="popup-card" style="max-width:900px;">
+        <div class="popup-header">
+          <h3 class="text-lg font-semibold text-gray-900">Resume</h3>
+          <span class="close-x" id="resumeClose">&times;</span>
+        </div>
+        <div class="popup-body" style="padding:0;">
+          <iframe id="resumeFrame" src="" style="width:100%;height:70vh;border:none;"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // New Application -> listings
+    document.getElementById('newAppBtn')?.addEventListener('click', () => {
+      window.location.href = '{{ url_for("job_listings") }}';
+    });
+
+    // Tabs
+    const tabs = {
+      accepted: { btn: document.getElementById('tab-accepted'), panel: document.getElementById('panel-accepted') },
+      rejected: { btn: document.getElementById('tab-rejected'), panel: document.getElementById('panel-rejected') },
+      under:    { btn: document.getElementById('tab-under'),    panel: document.getElementById('panel-under') },
+    };
+    function setActiveTab(key){
+      Object.entries(tabs).forEach(([k,{btn,panel}])=>{
+        const on = (k===key);
+        btn.classList.toggle('active', on);
+        panel.classList.toggle('hidden', !on);
+      });
+    }
+    tabs.accepted.btn?.addEventListener('click',()=>setActiveTab('accepted'));
+    tabs.rejected.btn?.addEventListener('click',()=>setActiveTab('rejected'));
+    tabs.under.btn?.addEventListener('click',()=>setActiveTab('under'));
+    setActiveTab('accepted');
+
+    // Store for modal items
+    const _store = new Map();
+    const statusMap = {
+      accepted: { label:'Accepted', cls:'text-green-700', icon:'fa-check-circle' },
+      rejected: { label:'Rejected', cls:'text-red-700', icon:'fa-times-circle' },
+      under:    { label:'Under Review', cls:'text-amber-700', icon:'fa-clock' },
+    };
+    function makeKey(prefix, idx){ return `${prefix}-${idx}`; }
+
+    function renderEmpty(ul){
+      ul.innerHTML = `<li class="text-gray-500">no applications</li>`;
+    }
+
+    function renderList(ul, data, statusKey){
+      ul.innerHTML = '';
+      if(!data || !data.length){ renderEmpty(ul); return; }
+
+      data.forEach((app, i)=>{
+        const key = makeKey(statusKey, i);
+        _store.set(key, { ...app, _status: statusKey });
+        const company = app.company_name || 'Unknown Company';
+        const applied = app.applied_at || '';
+        const title = app.job_title || 'Untitled Role';
+
+        ul.insertAdjacentHTML('beforeend', `
+          <li class="flex items-center">
+            <a href="#" data-key="${key}" class="job-link text-blue-700 hover:underline font-medium">${title}</a>
+            <span class="ml-2 text-xs text-gray-500">• ${company} • Applied: ${applied}</span>
+          </li>
+        `);
+      });
+
+      ul.querySelectorAll('.job-link').forEach(a=>{
+        a.addEventListener('click',(e)=>{
+          e.preventDefault();
+          const item = _store.get(a.getAttribute('data-key'));
+          openJobModal(item);
+        });
+      });
+    }
+
+    function fetchStatus(){
+      fetch('/api/seeker_status')
+        .then(r=>{ if(!r.ok) throw new Error('Failed to fetch status'); return r.json(); })
+        .then(data=>{
+          renderList(document.getElementById('accepted-applications'), data.accepted || [], 'accepted');
+          renderList(document.getElementById('rejected-applications'), data.rejected || [], 'rejected');
+          renderList(document.getElementById('under-review-applications'), data.under_review || [], 'under');
+        })
+        .catch(err=>{
+          console.error(err);
+          // Show graceful per-tab message
+          ['accepted-applications','rejected-applications','under-review-applications'].forEach(id=>{
+            const el=document.getElementById(id);
+            if(el) el.innerHTML = '<li class="text-red-600">error loading data</li>';
+          });
+        });
+    }
+
+    // Job modal
+    const jobModal = document.getElementById('jobModal');
+    const jobModalClose = document.getElementById('jobModalClose');
+    const jobModalTitle = document.getElementById('jobModalTitle');
+    const jobModalCompany = document.getElementById('jobModalCompany');
+    const jobModalApplied = document.getElementById('jobModalApplied');
+    const jobModalStatus = document.getElementById('jobModalStatus');
+    const jobModalDesc = document.getElementById('jobModalDesc');
+    const jobModalResp = document.getElementById('jobModalResp');
+    const jobModalIcon = document.getElementById('jobModalIcon');
+    const offerCtaWrap = document.getElementById('offerCtaWrap');
+    const offerBtn = document.getElementById('offerBtn');
+
+    function openJobModal(item){
+      jobModalTitle.textContent = item.job_title || 'Untitled Role';
+      jobModalCompany.textContent = item.company_name || 'Unknown Company';
+      jobModalApplied.textContent = item.applied_at || '';
+      const meta = statusMap[item._status] || statusMap.under;
+      jobModalStatus.textContent = meta.label;
+      jobModalStatus.className = `font-medium ${meta.cls}`;
+      jobModalIcon.className = `fas ${meta.icon} ${meta.cls} mr-2`;
+
+      jobModalDesc.textContent = item.job_description || 'No description provided.';
+      jobModalResp.textContent = item.key_responsibilities || 'No responsibilities listed.';
+
+      if(item._status === 'accepted'){
+        const id = encodeURIComponent(item.job_post_id || '');
+        const ap = encodeURIComponent(item.applied_at || '');
+        // Use job_post_id if available for accurate company fetch
+        offerBtn.href = `/offer_letter?job_post_id=${id}&applied_at=${ap}`;
+        offerBtn.setAttribute('download', '');  // ensure browser download
+        offerCtaWrap.classList.remove('hidden');
+      } else {
+        offerCtaWrap.classList.add('hidden');
+      } 
+      
+      jobModal.style.display = 'block';
+    }
+    jobModalClose?.addEventListener('click',()=> jobModal.style.display='none');
+    jobModal?.addEventListener('click',(e)=>{ if(e.target===jobModal) jobModal.style.display='none'; });
+
+    // Init
+    document.addEventListener('DOMContentLoaded', fetchStatus);
+  </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Add Resource</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
+    <style>
+        /* Custom styles */
+        :root {
+            --primary-color: #2563eb; /* blue-600 */
+            --primary-hover: #1d4ed8; /* blue-700 */
+        }
+        
+        .form-input-error {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2) !important;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .required-field::after {
+            content: '*';
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+        
+        .file-upload-container {
+            transition: all 0.2s ease;
+        }
+        
+        .file-upload-container:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .file-upload-container.has-file {
+            border-color: #10b981; /* emerald-500 */
+            background-color: #ecfdf5; /* emerald-50 */
+        }
+        
+        .preview-image {
+            max-height: 120px;
+            object-fit: contain;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <div class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <nav class="bg-white border-b border-gray-200 sticky top-0 z-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between">
+                <div class="flex items-center">
+                        <a href="#" class="flex items-center" onclick="location.reload(); return false;">
+                            <img class="h-8 w-auto hover:opacity-80 transition-opacity" src="{{ url_for('static', filename='img/logo_job.png') }}" alt="Logo">
+                            <span class="ml-3 text-xl font-semibold text-gray-900">JobMatch</span>
+                        </a>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <a href="/resources" class="text-blue-600 px-4 py-2 text-sm font-medium rounded-md hover:bg-blue-50 transition-all">
+                            <i class="fas fa-arrow-left mr-2"></i> Back to Resources
+                        </a>
+                    </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                <div class="p-6 md:p-8">
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">Add New Resource</h1>
+                    <p class="text-gray-600 mb-6">Fill out the form below to add a new learning resource</p>
+                    
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="mb-6 p-4 rounded-md {% if category == 'success' %}bg-green-50 text-green-800 border border-green-200{% else %}bg-red-50 text-red-800 border border-red-200{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="POST" action="{{ url_for('add_resource') }}" enctype="multipart/form-data" class="space-y-6" id="resourceForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="space-y-6">
+                                <!-- Resource Type -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 required-field">Resource Type</label>
+                                    <select name="resource_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" required>
+                                        <option value="" disabled selected>Select resource type</option>
+                                        <option value="Video" {% if request.form.get('resource_type') == 'Video' %}selected{% endif %}>Video</option>
+                                        <option value="Book" {% if request.form.get('resource_type') == 'Book' %}selected{% endif %}>Book</option>
+                                        <option value="Website" {% if request.form.get('resource_type') == 'Website' %}selected{% endif %}>Website</option>
+                                    </select>
+                                </div>
+                                
+                                <!-- Title -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 required-field">Title</label>
+                                    <input type="text" name="title" value="{{ request.form.get('title', '') }}" 
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" 
+                                           placeholder="Enter resource title" required maxlength="100"/>
+                                    <p id="title-error" class="error-message"></p>
+                                </div>
+                                
+                                <!-- URL -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 required-field">URL/Link</label>
+                                    <input type="url" name="url" value="{{ request.form.get('url', '') }}" 
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" 
+                                           placeholder="https://example.com" required/>
+                                    <p id="url-error" class="error-message"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <!-- Description -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" 
+                                              rows="4" placeholder="Enter resource description" maxlength="500">{{ request.form.get('description', '') }}</textarea>
+                                    <p class="mt-1 text-xs text-gray-500">Maximum 500 characters</p>
+                                </div>
+                                
+                                <!-- Image Upload -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Resource Image</label>
+                                    <div id="file-upload-container" class="mt-1 file-upload-container flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative">
+                                        <div id="upload-content" class="space-y-1 text-center">
+                                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400"></i>
+                                            <div class="text-sm text-gray-600">
+                                                <label for="file-upload" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
+                                                    <span>Upload an image</span>
+                                                    <input id="file-upload" name="image" type="file" class="sr-only" accept="image/png, image/jpeg, image/gif"/>
+                                                </label>
+                                            </div>
+                                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                        </div>
+                                        <div id="image-preview" class="hidden mt-2 text-center">
+                                            <img id="preview-image" src="#" alt="Preview" class="preview-image mx-auto"/>
+                                            <button type="button" id="remove-image" class="mt-2 text-sm text-red-600 hover:text-red-500">
+                                                <i class="fas fa-times mr-1"></i>Remove Image
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p id="file-error" class="error-message"></p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end pt-4 border-t">
+                            <div class="flex space-x-2">
+                                <a href="{{ url_for('resources') }}" class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all">
+                                    Cancel
+                                </a>
+                                <button type="submit" class="btn-primary text-white px-6 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <i class="fas fa-plus-circle mr-2"></i> Add Resource
+                                </button>
+                            </div> 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // File upload preview functionality
+            const fileInput = document.getElementById('file-upload');
+            const fileUploadContainer = document.getElementById('file-upload-container');
+            const uploadContent = document.getElementById('upload-content');
+            const imagePreview = document.getElementById('image-preview');
+            const previewImage = document.getElementById('preview-image');
+            const removeImageBtn = document.getElementById('remove-image');
+            
+            
+            fileInput.addEventListener('change', function(e) {
+                if (fileInput.files && fileInput.files[0]) {
+                    validateFile(fileInput);
+                    
+                    if (fileInput.files[0].type.match('image.*')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            showImagePreview(e.target.result);
+                        }
+                        reader.readAsDataURL(fileInput.files[0]);
+                    }
+                }
+            });
+            
+            removeImageBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                uploadContent.classList.remove('hidden');
+                imagePreview.classList.add('hidden');
+                fileUploadContainer.classList.remove('has-file');
+                clearFileError();
+            });
+            
+            function showImagePreview(imageSrc) {
+                previewImage.src = imageSrc;
+                uploadContent.classList.add('hidden');
+                imagePreview.classList.remove('hidden');
+                fileUploadContainer.classList.add('has-file');
+            }
+            
+            // Form validation
+            const form = document.getElementById('resourceForm');
+            if (form) {
+                form.addEventListener('submit', validateForm);
+                
+                // Add real-time validation for key fields
+                const validateFields = ['resource_type', 'title', 'url'];
+                validateFields.forEach(field => {
+                    const input = form[field];
+                    if (input) {
+                        input.addEventListener('blur', validateField);
+                    }
+                });
+            }
+            
+            function validateField(e) {
+                const field = e.target;
+                const value = field.value.trim();
+                const fieldName = field.name;
+                const errorElement = document.getElementById(`${fieldName}-error`);
+                
+                // Clear previous error state
+                field.classList.remove('form-input-error');
+                if (errorElement) errorElement.textContent = '';
+                
+                // Field-specific validation
+                let isValid = true;
+                let errorMessage = '';
+                
+                if (field.required && value === '') {
+                    isValid = false;
+                    errorMessage = 'This field is required';
+                } else if (fieldName === 'url' && value !== '' && !isValidUrl(value)) {
+                    isValid = false;
+                    errorMessage = 'Please enter a valid URL (e.g., https://example.com)';
+                } else if (fieldName === 'title' && value.length > 100) {
+                    isValid = false;
+                    errorMessage = 'Maximum 100 characters allowed';
+                }
+                
+                if (!isValid) {
+                    field.classList.add('form-input-error');
+                    if (errorElement) {
+                        errorElement.textContent = errorMessage;
+                    } else {
+                        // Create error element if it doesn't exist
+                        const newErrorElement = document.createElement('p');
+                        newErrorElement.id = `${fieldName}-error`;
+                        newErrorElement.className = 'error-message';
+                        newErrorElement.textContent = errorMessage;
+                        field.parentNode.appendChild(newErrorElement);
+                    }
+                }
+                
+                return isValid;
+            }
+            
+            function validateFile(input) {
+                const file = input.files[0];
+                const errorElement = document.getElementById('file-error');
+                
+                // Clear previous error state
+                input.classList.remove('form-input-error');
+                if (errorElement) errorElement.textContent = '';
+                
+                if (file) {
+                    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                    if (!validTypes.includes(file.type)) {
+                        showFileError("Please upload an image file (JPEG, PNG, or GIF)");
+                        input.value = '';
+                        return false;
+                    }
+                    
+                    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                        showFileError("File size must be less than 10MB");
+                        input.value = '';
+                        return false;
+                    }
+                }
+                return true;
+            }
+            
+            function showFileError(message) {
+                const errorElement = document.getElementById('file-error');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                }
+                document.getElementById('file-upload').classList.add('form-input-error');
+            }
+            
+            function clearFileError() {
+                const errorElement = document.getElementById('file-error');
+                if (errorElement) errorElement.textContent = '';
+                document.getElementById('file-upload').classList.remove('form-input-error');
+            }
+            
+            function isValidUrl(string) {
+                try {
+                    new URL(string);
+                    return true;
+                } catch (_) {
+                    return false;
+                }
+            }
+            
+            function validateForm(e) {
+                e.preventDefault();
+                
+                // Validate all required fields
+                const requiredFields = ['resource_type', 'title', 'url'];
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    const input = form[field];
+                    const event = { target: input };
+                    if (!validateField(event)) {
+                        isValid = false;
+                    }
+                });
+                
+                // Validate file if uploaded
+                if (fileInput.files.length > 0 && !validateFile(fileInput)) {
+                    isValid = false;
+                }
+                
+                if (isValid) {
+                    form.submit();
+                } else {
+                    // Scroll to first error
+                    const firstError = document.querySelector('.form-input-error');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                }
+                
+                return isValid;
+            }
+        });
+    </script>
+</body>
+</html>
