@@ -18,7 +18,7 @@ It provides end-to-end functionality — authentication, job management, applica
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/yourusername/JobMatch.git
+git clone https://github.com/gopikrishna1999/JobMatch.git
 cd JobMatch
 ```
 
