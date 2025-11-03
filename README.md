@@ -15,30 +15,20 @@ It provides end-to-end functionality — authentication, job management, applica
 
 ## 🧩 Environment Setup
 
-### 1️⃣ Clone the repository
+###  Clone the repository
 
 ```bash
 git clone https://github.com/gopikrishna1999/JobMatch.git
 cd JobMatch
 ```
 
-### 2️⃣ Create a virtual environment
-
-```bash
-python -m venv venv
-```
-
-Activate it:
-- On **Windows**: `venv\Scripts\activate`
-- On **Mac/Linux**: `source venv/bin/activate`
-
-### 3️⃣ Install dependencies
+###  Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4️⃣ Create `.env` file
+###  Create `.env` file
 
 ```
 SECRET_KEY=change_me
@@ -159,8 +149,6 @@ Or set up via any PaaS (Render, Railway, Azure, etc.), pointing the entry to `ru
 
 | Action | Command |
 |--------|----------|
-| Initialize venv | `python -m venv venv` |
-| Activate venv | `source venv/bin/activate` or `venv\Scripts\activate` |
 | Install dependencies | `pip install -r requirements.txt` |
 | Initialize DB | `python -m flask shell` → `db.create_all()` |
 | Run app | `python run.py` |
