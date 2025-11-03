@@ -1,5 +1,5 @@
 import logging
-from flask import render_template, request, redirect, flash, url_for
+from flask import jsonify, render_template, request, redirect, flash, url_for
 from flask_login import login_user, logout_user, login_required
 from ..database import db, bcrypt, login_manager
 from ..models import User, SeekerData
@@ -108,6 +108,47 @@ def register(app):
                 return redirect(url_for("seeker_dashboard" if has_bio else "seeker_data"))
             return redirect(url_for("company_dashboard"))
         return render_template("login.html", form=_DummyForm())
+    
+    # Forgot Password
+    @app.post("/api/forgot/check")
+    def api_forgot_check():
+        email = (request.form.get("email") or "").strip().lower()
+        if not email:
+            return jsonify({"ok": False, "error": "Email required"}), 400
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"ok": True, "exists": False})
+        return jsonify({"ok": True, "exists": True, "role": user.role})
+
+    @app.post("/api/forgot/reset")
+    def api_forgot_reset():
+        email = (request.form.get("email") or "").strip().lower()
+        new_pw = request.form.get("new_password") or ""
+        confirm = request.form.get("confirm_password") or ""
+
+        if not email or not new_pw or not confirm:
+            return jsonify({"ok": False, "error": "All fields are required"}), 400
+        if new_pw != confirm:
+            return jsonify({"ok": False, "error": "Passwords do not match"}), 400
+        if len(new_pw) < 6:
+            return jsonify({"ok": False, "error": "Password must be at least 6 characters"}), 400
+
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            return jsonify({"ok": False, "error": "Email not found"}), 404
+
+        # NEW: block if new password equals existing password
+        if bcrypt.check_password_hash(user.password, new_pw):
+            return jsonify({"ok": False, "error": "New password cannot be the same as your current password"}), 400
+
+        try:
+            user.password = bcrypt.generate_password_hash(new_pw).decode("utf-8")
+            db.session.commit()
+            return jsonify({"ok": True, "message": "Password updated"})
+        except Exception as e:
+            db.session.rollback()
+            app.logger.exception("forgot/reset failed")
+            return jsonify({"ok": False, "error": "Server error"}), 500
 
     @app.route("/logout")
     @login_required

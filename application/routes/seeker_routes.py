@@ -13,6 +13,7 @@ from ..models import (
     JobPost, ActiveApplication, AcceptedApplication, RejectedApplication,
     SeekerData, CompanyData
 )
+from ..services.offer_service import render_offer_letter
 from ..utils.security import seeker_required
 from ..utils.file_utils import allowed_file, random_filename
 from .. import bcrypt  # bcrypt is initialized in application/__init__.py
@@ -66,7 +67,6 @@ def register(app):
 
     # -------------------------------------------------
     # Unified Profile (view + edit + password)
-    # – used by seeker_dashboard.html -> url_for('profile')
     # -------------------------------------------------
     @app.route("/profile", methods=["GET", "POST"])
     @login_required
@@ -374,3 +374,40 @@ def register(app):
             "rejected": filt(rejected, "rejected"),
             "under_review": filt(under_review, "under_review"),
         })
+    @app.route("/offer_letter", methods=["GET"])
+    @login_required
+    @seeker_required
+    def offer_letter():
+        from flask import make_response, request
+        # import that works across layouts
+        try:
+            from ..services.offer_service import render_offer_letter
+        except Exception:
+            try:
+                from ..offer_service import render_offer_letter
+            except Exception:
+                # last-ditch absolute import if your app uses top-level package
+                from application.offer_service import render_offer_letter
+
+        # Prefer job_post_id; fall back to job_title if needed
+        job_post_id = request.args.get("job_post_id", type=int)
+        job_title   = request.args.get("job_title") or request.args.get("title")
+        applied_at  = request.args.get("applied_at", "")
+
+        # Render HTML and get a nice filename from your service
+        html, filename = render_offer_letter(
+            seeker=current_user,
+            job_post_id=job_post_id,
+            job_title=job_title,
+            applied_at_str=applied_at
+        )
+
+        # ?download=1 | true | yes  => force download
+        want_download = (request.args.get("download") or "").lower() in {"1", "true", "yes"}
+
+        resp = make_response(html)
+        resp.headers["Content-Type"] = "text/html; charset=utf-8"
+        resp.headers["X-Content-Type-Options"] = "nosniff"
+        disp = "attachment" if want_download else "inline"
+        resp.headers["Content-Disposition"] = f'{disp}; filename="{filename}"'
+        return resp
