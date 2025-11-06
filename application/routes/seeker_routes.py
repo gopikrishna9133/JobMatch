@@ -13,7 +13,7 @@ from ..models import (
     JobPost, ActiveApplication, AcceptedApplication, RejectedApplication,
     SeekerData, CompanyData
 )
-from ..services.offer_service import render_offer_letter
+from ..services.offer_service import render_offer_letter, render_template
 from ..utils.security import seeker_required
 from ..utils.file_utils import allowed_file, random_filename
 from .. import bcrypt  # bcrypt is initialized in application/__init__.py
