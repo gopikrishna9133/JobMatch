@@ -154,54 +154,44 @@
         Don’t have an account? <a href="{{ url_for('register') }}">Sign up</a>
       </div>
     </div>
-
-    <!-- Forgot Password Modal -->
-<div id="fpModal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.35); z-index:60;">
-  <div style="width:min(520px,92vw); background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; position:relative;">
-    <button type="button" aria-label="Close" onclick="fpClose()"
-            style="position:absolute; right:12px; top:10px; border:0; background:transparent; font-size:20px; cursor:pointer; color:#dc2626;">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-    <div class="card-header" style="margin-bottom:12px">
-      <div class="title">Reset Password</div>
-      <div class="subtitle" id="fpSubtitle">Enter your email to continue</div>
-    </div>
-
-    <div id="fpAlert" class="flash danger" style="display:none; margin-bottom:10px;"></div>
-
-    <!-- email -->
-    <form id="fpFormEmail" onsubmit="fpCheck(); return false;">
-      <label>Email Address</label>
-      <div class="field">
-        <i class="fa-regular fa-envelope icon"></i>
-        <input id="fpEmail" type="email" placeholder="your@email.com" autocomplete="email" required/>
-      </div>
-      <button class="cta" style="margin-top:14px;" type="submit">Next</button>
-    </form>
-
-    <!-- new password -->
-    <form id="fpFormReset" onsubmit="fpSave(); return false;" style="display:none;">
-      <div class="subtitle" id="fpRoleNote" style="margin-bottom:10px;"></div>
-
-      <label>New Password</label>
-      <div class="field">
-        <i class="fa-solid fa-lock icon"></i>
-        <input id="fpNew" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
-        <button type="button" class="toggle" aria-label="Show password" onclick="fpTogglePw()">
-          <i id="fpPwIcon" class="fa-regular fa-eye"></i>
+    <div id="fpModal" style="position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.35); z-index:60;">
+      <div style="width:min(520px,92vw); background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; position:relative;">
+        <button type="button" aria-label="Close" onclick="fpClose()"
+        style="position:absolute; right:12px; top:10px; border:0; background:transparent; font-size:20px; cursor:pointer; color:#dc2626;">
+          <i class="fa-solid fa-xmark"></i>
         </button>
+        <div class="card-header" style="margin-bottom:12px">
+          <div class="title">Reset Password</div>
+          <div class="subtitle" id="fpSubtitle">Enter your email to continue</div>
+        </div>
+        <div id="fpAlert" class="flash danger" style="display:none; margin-bottom:10px;"></div>
+        <form id="fpFormEmail" onsubmit="fpCheck(); return false;">
+          <label>Email Address</label>
+          <div class="field">
+            <i class="fa-regular fa-envelope icon"></i>
+            <input id="fpEmail" type="email" placeholder="your@email.com" autocomplete="email" required/>
+          </div>
+          <button class="cta" style="margin-top:14px;" type="submit">Next</button>
+        </form>
+        <form id="fpFormReset" onsubmit="fpSave(); return false;" style="display:none;">
+          <div class="subtitle" id="fpRoleNote" style="margin-bottom:10px;"></div>
+          <label>New Password</label>
+          <div class="field">
+            <i class="fa-solid fa-lock icon"></i>
+            <input id="fpNew" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
+            <button type="button" class="toggle" aria-label="Show password" onclick="fpTogglePw()">
+              <i id="fpPwIcon" class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <label style="margin-top:12px;">Confirm Password</label>
+          <div class="field">
+            <i class="fa-solid fa-lock icon"></i>
+            <input id="fpConfirm" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
+          </div>
+          <button class="cta" style="margin-top:14px;" type="submit">Save</button>
+        </form>
       </div>
-
-      <label style="margin-top:12px;">Confirm Password</label>
-      <div class="field">
-        <i class="fa-solid fa-lock icon"></i>
-        <input id="fpConfirm" type="password" placeholder="••••••••" autocomplete="new-password" required minlength="6"/>
-      </div>
-      
-      <button class="cta" style="margin-top:14px;" type="submit">Save</button>
-    </form>
-  </div>
-</div>
+    </div>
 
   </section>
 
@@ -214,83 +204,77 @@
     }
 
     const fp = document.getElementById('fpModal');
-  const fpAlert = document.getElementById('fpAlert');
-  const fpSubtitle = document.getElementById('fpSubtitle');
-  const fpRoleNote = document.getElementById('fpRoleNote');
-  const formEmail = document.getElementById('fpFormEmail');
-  const formReset = document.getElementById('fpFormReset');
-  const fpEmail = document.getElementById('fpEmail');
-  const fpNew = document.getElementById('fpNew');
-  const fpConfirm = document.getElementById('fpConfirm');
+    const fpAlert = document.getElementById('fpAlert');
+    const fpSubtitle = document.getElementById('fpSubtitle');
+    const fpRoleNote = document.getElementById('fpRoleNote');
+    const formEmail = document.getElementById('fpFormEmail');
+    const formReset = document.getElementById('fpFormReset');
+    const fpEmail = document.getElementById('fpEmail');
+    const fpNew = document.getElementById('fpNew');
+    const fpConfirm = document.getElementById('fpConfirm');
 
-  // Open/close
-  function fpOpen(){ 
-    fp.style.display='flex';
-    fpAlert.style.display='none';
-    formEmail.style.display='block';
-    formReset.style.display='none';
-    fpSubtitle.textContent = 'Enter your email to continue';
-    fpEmail.value=''; fpNew.value=''; fpConfirm.value='';
-    setTimeout(()=>fpEmail.focus(), 50);
-  }
-  function fpClose(){ fp.style.display='none'; }
-  function fpError(msg){ fpAlert.textContent = msg; fpAlert.className='flash danger'; fpAlert.style.display='block'; }
-  function fpInfo(msg){ fpAlert.textContent = msg; fpAlert.className='flash info'; fpAlert.style.display='block'; }
+    function fpOpen(){ 
+      fp.style.display='flex';
+      fpAlert.style.display='none';
+      formEmail.style.display='block';
+      formReset.style.display='none';
+      fpSubtitle.textContent = 'Enter your email to continue';
+      fpEmail.value=''; fpNew.value=''; fpConfirm.value='';
+      setTimeout(()=>fpEmail.focus(), 50);
+    }
+    function fpClose(){ fp.style.display='none'; }
+    function fpError(msg){ fpAlert.textContent = msg; fpAlert.className='flash danger'; fpAlert.style.display='block'; }
+    function fpInfo(msg){ fpAlert.textContent = msg; fpAlert.className='flash info'; fpAlert.style.display='block'; }
 
-  // Hook the existing "Forgot password?" link
-  document.querySelector('.meta a[href="#"]')?.addEventListener('click', (e)=>{
-    e.preventDefault(); fpOpen();
-  });
+    document.querySelector('.meta a[href="#"]')?.addEventListener('click', (e)=>{
+      e.preventDefault(); fpOpen();
+    });
 
-  //  Check email
-  async function fpCheck(){
-    fpAlert.style.display='none';
-    const email = (fpEmail.value||'').trim().toLowerCase();
-    if(!email) return fpError('Please enter an email.');
-    const body = new FormData(); body.append('email', email);
-    try{
-      const res = await fetch('/api/forgot/check', { method:'POST', body });
-      const data = await res.json();
-      if(!data.ok) return fpError(data.error || 'Error checking email');
+    async function fpCheck(){
+      fpAlert.style.display='none';
+      const email = (fpEmail.value||'').trim().toLowerCase();
+      if(!email) return fpError('Please enter an email.');
+      const body = new FormData(); body.append('email', email);
+      try{
+        const res = await fetch('/api/forgot/check', { method:'POST', body });
+        const data = await res.json();
+        if(!data.ok) return fpError(data.error || 'Error checking email');
 
-      if(!data.exists) return fpError('Email not found. Double-check or register a new account.');
-      // Found → move to reset step
-      formEmail.style.display='none';
-      formReset.style.display='block';
-      formReset.dataset.email = email;
-      fpSubtitle.textContent = 'Set a new password';
-      fpRoleNote.textContent = data.role === 'company' ? 'Account type: Employer' : 'Account type: Job Seeker';
-      setTimeout(()=>fpNew.focus(), 50);
-    }catch(e){ fpError('Network error while checking email.'); }
-  }
+        if(!data.exists) return fpError('Email not found. Double-check or register a new account.');
+        formEmail.style.display='none';
+        formReset.style.display='block';
+        formReset.dataset.email = email;
+        fpSubtitle.textContent = 'Set a new password';
+        fpRoleNote.textContent = data.role === 'company' ? 'Account type: Employer' : 'Account type: Job Seeker';
+        setTimeout(()=>fpNew.focus(), 50);
+      }catch(e){ fpError('Network error while checking email.'); }
+    }
 
-  //  Save
-  async function fpSave(){
-    fpAlert.style.display='none';
-    const email = formReset.dataset.email || '';
-    const pw = fpNew.value, cf = fpConfirm.value;
-    const body = new FormData();
-    body.append('email', email);
-    body.append('new_password', pw);
-    body.append('confirm_password', cf);
+    async function fpSave(){
+      fpAlert.style.display='none';
+      const email = formReset.dataset.email || '';
+      const pw = fpNew.value, cf = fpConfirm.value;
+      const body = new FormData();
+      body.append('email', email);
+      body.append('new_password', pw);
+      body.append('confirm_password', cf);
 
-    try{
-      const res = await fetch('/api/forgot/reset', { method:'POST', body });
-      const data = await res.json();
-      if(!data.ok) return fpError(data.error || 'Could not update password.');
-      fpInfo('Password updated. You can now sign in with your new password.');
-      setTimeout(()=>{ fpClose(); }, 1200);
-    }catch(e){ fpError('Network error while saving new password.'); }
-  }
+      try{
+        const res = await fetch('/api/forgot/reset', { method:'POST', body });
+        const data = await res.json();
+        if(!data.ok) return fpError(data.error || 'Could not update password.');
+        fpInfo('Password updated. You can now sign in with your new password.');
+        setTimeout(()=>{ fpClose(); }, 1200);
+      }catch(e){ fpError('Network error while saving new password.'); }
+    }
 
-  // Eye toggle ONLY on new password
-  function fpTogglePw(){
-    const icon = document.getElementById('fpPwIcon');
-    if(fpNew.type==='password'){ fpNew.type='text'; icon.classList.replace('fa-eye','fa-eye-slash'); }
-    else{ fpNew.type='password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
-  }
+    function fpTogglePw(){
+      const icon = document.getElementById('fpPwIcon');
+      if(fpNew.type==='password'){ fpNew.type='text'; icon.classList.replace('fa-eye','fa-eye-slash'); }
+      else{ fpNew.type='password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
+    }
 
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') fpClose(); });
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') fpClose(); });
   </script>
 </body>
 </html>

@@ -8,10 +8,9 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com/3.4.5?plugins=forms@0.5.7,typography@0.5.13,aspect-ratio@0.4.2,container-queries@0.1.1"></script>
     <style>
-        /* Custom styles */
         :root {
-            --primary-color: #2563eb; /* blue-600 */
-            --primary-hover: #1d4ed8; /* blue-700 */
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
         }
         
         .form-input-error {
@@ -40,8 +39,8 @@
         }
         
         .file-upload-container.has-file {
-            border-color: #10b981; /* emerald-500 */
-            background-color: #ecfdf5; /* emerald-50 */
+            border-color: #10b981;
+            background-color: #ecfdf5;
         }
         
         .preview-image {
@@ -62,7 +61,6 @@
 </head>
 <body class="bg-gray-50 font-sans">
     <div class="min-h-screen flex flex-col">
-        <!-- Navbar -->
         <nav class="bg-white border-b border-gray-200 sticky top-0 z-10">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between">
                 <div class="flex items-center">
@@ -85,7 +83,6 @@
                     <h1 class="text-2xl font-bold text-gray-900 mb-2">Add New Resource</h1>
                     <p class="text-gray-600 mb-6">Fill out the form below to add a new learning resource</p>
                     
-                    <!-- Flash Messages -->
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
@@ -99,7 +96,6 @@
                     <form method="POST" action="{{ url_for('add_resource') }}" enctype="multipart/form-data" class="space-y-6" id="resourceForm">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div class="space-y-6">
-                                <!-- Resource Type -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 required-field">Resource Type</label>
                                     <select name="resource_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" required>
@@ -110,7 +106,6 @@
                                     </select>
                                 </div>
                                 
-                                <!-- Title -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 required-field">Title</label>
                                     <input type="text" name="title" value="{{ request.form.get('title', '') }}" 
@@ -119,7 +114,6 @@
                                     <p id="title-error" class="error-message"></p>
                                 </div>
                                 
-                                <!-- URL -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 required-field">URL/Link</label>
                                     <input type="url" name="url" value="{{ request.form.get('url', '') }}" 
@@ -130,7 +124,6 @@
                             </div>
                             
                             <div class="space-y-6">
-                                <!-- Description -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Description</label>
                                     <textarea name="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3" 
@@ -138,7 +131,6 @@
                                     <p class="mt-1 text-xs text-gray-500">Maximum 500 characters</p>
                                 </div>
                                 
-                                <!-- Image Upload -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Resource Image</label>
                                     <div id="file-upload-container" class="mt-1 file-upload-container flex flex-col justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative">
@@ -182,7 +174,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // File upload preview functionality
             const fileInput = document.getElementById('file-upload');
             const fileUploadContainer = document.getElementById('file-upload-container');
             const uploadContent = document.getElementById('upload-content');
@@ -220,12 +211,10 @@
                 fileUploadContainer.classList.add('has-file');
             }
             
-            // Form validation
             const form = document.getElementById('resourceForm');
             if (form) {
                 form.addEventListener('submit', validateForm);
                 
-                // Add real-time validation for key fields
                 const validateFields = ['resource_type', 'title', 'url'];
                 validateFields.forEach(field => {
                     const input = form[field];
@@ -241,11 +230,9 @@
                 const fieldName = field.name;
                 const errorElement = document.getElementById(`${fieldName}-error`);
                 
-                // Clear previous error state
                 field.classList.remove('form-input-error');
                 if (errorElement) errorElement.textContent = '';
                 
-                // Field-specific validation
                 let isValid = true;
                 let errorMessage = '';
                 
@@ -265,7 +252,6 @@
                     if (errorElement) {
                         errorElement.textContent = errorMessage;
                     } else {
-                        // Create error element if it doesn't exist
                         const newErrorElement = document.createElement('p');
                         newErrorElement.id = `${fieldName}-error`;
                         newErrorElement.className = 'error-message';
@@ -281,7 +267,6 @@
                 const file = input.files[0];
                 const errorElement = document.getElementById('file-error');
                 
-                // Clear previous error state
                 input.classList.remove('form-input-error');
                 if (errorElement) errorElement.textContent = '';
                 
@@ -293,7 +278,7 @@
                         return false;
                     }
                     
-                    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    if (file.size > 10 * 1024 * 1024) {
                         showFileError("File size must be less than 10MB");
                         input.value = '';
                         return false;
@@ -328,7 +313,6 @@
             function validateForm(e) {
                 e.preventDefault();
                 
-                // Validate all required fields
                 const requiredFields = ['resource_type', 'title', 'url'];
                 let isValid = true;
                 
@@ -340,7 +324,6 @@
                     }
                 });
                 
-                // Validate file if uploaded
                 if (fileInput.files.length > 0 && !validateFile(fileInput)) {
                     isValid = false;
                 }
@@ -348,7 +331,6 @@
                 if (isValid) {
                     form.submit();
                 } else {
-                    // Scroll to first error
                     const firstError = document.querySelector('.form-input-error');
                     if (firstError) {
                         firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });

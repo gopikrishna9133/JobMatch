@@ -16,7 +16,7 @@
       background-position: center center;
       background-repeat: no-repeat;
       background-attachment: fixed;
-      min-height: 100vh; /* full screen */
+      min-height: 100vh;
     }
     .focus-ring:focus-visible {
       outline: 2px solid #1d4ed8;
@@ -26,7 +26,6 @@
   </style>
 </head>
 <body class="bg-gray-50 font-[Inter]">
-  <!-- NAV -->
   <header class="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-20">
     <nav class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="{{ url_for('welcome') }}" class="flex items-center gap-2 focus-ring">
@@ -40,9 +39,8 @@
     </nav>
   </header>
 
-  <!-- HERO (headline + ctas + 3 cards) -->
   <section class="hero text-white flex items-center justify-center relative">
-    <div class="absolute inset-0 bg-black/40"></div> <!-- overlay for readability -->
+    <div class="absolute inset-0 bg-black/40"></div>
 
     <div class="relative z-10 w-full">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 sm:pt-24">
@@ -61,7 +59,6 @@
           </a>
         </div>
 
-        <!-- 3 value cards ON the hero image -->
         <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           <div class="backdrop-blur-sm bg-white/80 p-5 rounded-lg shadow border border-white/60">
             <div class="text-xl mb-2">👤</div>
@@ -91,7 +88,6 @@
     </div>
   </section>
 
-  <!-- ABOUT -->
   <section class="bg-gray-50">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
       <div class="md:col-span-2">
@@ -118,7 +114,6 @@
     </div>
   </section>
 
-  <!-- FOOTER -->
   <footer class="border-t border-gray-200">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-gray-600">
       © 2025 JobMatch · Your Job is our priority · <a href="#" class="underline">Privacy</a> · <a href="#" class="underline">Contact</a>

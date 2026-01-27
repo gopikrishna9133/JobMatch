@@ -23,7 +23,6 @@
     .tab-under.active{color:#fff;background:#f59e0b;border-color:#d97706}
     .muted{color:#6b7280}
 
-    /* Flash styles */
     .flash {
       position: relative;
       border-radius: .5rem;
@@ -45,31 +44,29 @@
 </head>
 <body class="bg-gray-50 font-[Inter] text-gray-900">
   <div class="min-h-screen flex flex-col">
-    <!-- NAV -->
-  <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="#" class="flex items-center gap-2">
-        <img src="{{ url_for('static', filename='img/logo_job.png') }}" class="h-8 w-auto" alt="JobMatch">
-        <span class="text-xl font-semibold">JobMatch</span>
-      </a>
-      <div class="flex items-center gap-2">
-        <a href="{{ url_for('resources') }}" class="btn px-3 py-2 bg-blue-500 text-white hover:bg-blue-800 rounded-md">
-          <span class="btn-icon">📘</span> Resources
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <a href="#" class="flex items-center gap-2">
+          <img src="{{ url_for('static', filename='img/logo_job.png') }}" class="h-8 w-auto" alt="JobMatch">
+          <span class="text-xl font-semibold">JobMatch</span>
         </a>
-        <a href="{{ url_for('chatbot') }}" class="btn px-3 py-2 bg-purple-500 text-white hover:bg-purple-800 rounded-md">
-          <span class="btn-icon">🤖</span> Chatbot AI
-        </a>
-        <a href="{{ url_for('profile') }}" class="btn px-3 py-2 bg-gray-500 text-white hover:bg-gray-800 rounded-md">
-          <span class="btn-icon">👤</span> Profile
-        </a>
-        <a href="{{ url_for('logout') }}" class="btn px-3 py-2 bg-red-500 text-white hover:bg-red-800 rounded-md">
-          <span class="btn-icon">↪</span> Logout
-        </a>
+        <div class="flex items-center gap-2">
+          <a href="{{ url_for('resources') }}" class="btn px-3 py-2 bg-blue-500 text-white hover:bg-blue-800 rounded-md">
+            <span class="btn-icon">📘</span> Resources
+          </a>
+          <a href="{{ url_for('chatbot') }}" class="btn px-3 py-2 bg-purple-500 text-white hover:bg-purple-800 rounded-md">
+            <span class="btn-icon">🤖</span> Chatbot AI
+          </a>
+          <a href="{{ url_for('profile') }}" class="btn px-3 py-2 bg-gray-500 text-white hover:bg-gray-800 rounded-md">
+            <span class="btn-icon">👤</span> Profile
+          </a>
+          <a href="{{ url_for('logout') }}" class="btn px-3 py-2 bg-red-500 text-white hover:bg-red-800 rounded-md">
+            <span class="btn-icon">↪</span> Logout
+          </a>
+        </div>
       </div>
-    </div>
-  </nav>
+    </nav>
 
-    <!-- Utility bar (New Application) -->
     <div class="bg-white/70 backdrop-blur border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between">
           <h1 class="text-2xl font-semibold text-gray-900">Job Application Dashboard</h1>
@@ -80,12 +77,10 @@
       </div>
     </div>
 
-    <!-- CONTENT -->
     <div class="flex-1 overflow-hidden">
       <div class="py-6">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
 
-          <!-- Status tabs -->
           <div class="bg-white rounded-lg shadow p-6">
             <div class="flex flex-wrap items-center gap-2">
               <button id="tab-accepted" class="tab-btn tab-accepted active inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium">
@@ -99,7 +94,6 @@
               </button>
             </div>
 
-            <!-- Panels -->
             <div class="mt-5">
               <div id="panel-accepted">
                 <ul id="accepted-applications" class="ml-1 space-y-2 text-sm text-gray-800"></ul>
@@ -113,7 +107,6 @@
             </div>
           </div>
 
-          <!-- Flash messages -->
           {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
               <div class="mt-6" id="flash-wrap">
@@ -125,7 +118,6 @@
                 {% endfor %}
               </div>
               <script>
-                // Auto-dismiss after 4s
                 setTimeout(()=>{
                   document.querySelectorAll('#flash-wrap .flash').forEach(el=>{
                     el.style.opacity='0';
@@ -140,7 +132,6 @@
       </div>
     </div>
 
-    <!-- Job Details Modal -->
     <div id="jobModal" class="popup">
       <div class="popup-card">
         <div class="popup-header">
@@ -190,12 +181,10 @@
   </div>
 
   <script>
-    // New Application -> listings
     document.getElementById('newAppBtn')?.addEventListener('click', () => {
       window.location.href = '{{ url_for("job_listings") }}';
     });
 
-    // Tabs
     const tabs = {
       accepted: { btn: document.getElementById('tab-accepted'), panel: document.getElementById('panel-accepted') },
       rejected: { btn: document.getElementById('tab-rejected'), panel: document.getElementById('panel-rejected') },
@@ -213,7 +202,6 @@
     tabs.under.btn?.addEventListener('click',()=>setActiveTab('under'));
     setActiveTab('accepted');
 
-    // Store for modal items
     const _store = new Map();
     const statusMap = {
       accepted: { label:'Accepted', cls:'text-green-700', icon:'fa-check-circle' },
@@ -264,7 +252,6 @@
         })
         .catch(err=>{
           console.error(err);
-          // Show graceful per-tab message
           ['accepted-applications','rejected-applications','under-review-applications'].forEach(id=>{
             const el=document.getElementById(id);
             if(el) el.innerHTML = '<li class="text-red-600">error loading data</li>';
@@ -272,7 +259,6 @@
         });
     }
 
-    // Job modal
     const jobModal = document.getElementById('jobModal');
     const jobModalClose = document.getElementById('jobModalClose');
     const jobModalTitle = document.getElementById('jobModalTitle');
@@ -300,9 +286,8 @@
       if(item._status === 'accepted'){
         const id = encodeURIComponent(item.job_post_id || '');
         const ap = encodeURIComponent(item.applied_at || '');
-        // Use job_post_id if available for accurate company fetch
         offerBtn.href = `/offer_letter?job_post_id=${id}&applied_at=${ap}`;
-        offerBtn.setAttribute('download', '');  // ensure browser download
+        offerBtn.setAttribute('download', '');
         offerCtaWrap.classList.remove('hidden');
       } else {
         offerCtaWrap.classList.add('hidden');
@@ -313,7 +298,6 @@
     jobModalClose?.addEventListener('click',()=> jobModal.style.display='none');
     jobModal?.addEventListener('click',(e)=>{ if(e.target===jobModal) jobModal.style.display='none'; });
 
-    // Init
     document.addEventListener('DOMContentLoaded', fetchStatus);
   </script>
 </body>

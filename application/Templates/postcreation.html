@@ -16,7 +16,6 @@
   </style>
 </head>
 <body class="bg-gray-50 font-[Inter] text-gray-900">
-  <!-- top bar -->
   <nav class="bg-white border-b border-gray-200 sticky top-0 z-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <a href="#" class="flex items-center" onclick="location.reload();return false;">
@@ -48,12 +47,9 @@
     </div>
 
     <form method="POST" enctype="multipart/form-data" class="space-y-8">
-
-      <!-- Section: Basics -->
       <section class="bg-white rounded-lg shadow p-6 space-y-6">
         <h2 class="text-lg font-semibold">Basics</h2>
         <div class="grid sm:grid-cols-2 gap-6">
-          <!-- Job Title -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Job Title</label>
             <input type="text" name="job_title"
@@ -61,8 +57,6 @@
                    placeholder="Software Engineer" required
                    value="{{ job.job_title if job else '' }}">
           </div>
-
-          <!-- Company -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Company</label>
             <input type="text" name="company_name"
@@ -70,8 +64,6 @@
                    placeholder="Apple Inc." required
                    value="{{ job.company_name if job else '' }}">
           </div>
-
-          <!-- Location -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Location</label>
             <input type="text" name="location"
@@ -79,8 +71,6 @@
                    placeholder="City, State" required
                    value="{{ job.location if job else '' }}">
           </div>
-
-          <!-- Employment Type -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Employment Type</label>
             <select name="employment_type"
@@ -94,8 +84,6 @@
               <option value="Internship" {% if et == 'Internship' %}selected{% endif %}>Internship</option>
             </select>
           </div>
-
-          <!-- Salary From -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Salary From (USD)</label>
             <input type="number" name="salary_from"
@@ -104,8 +92,6 @@
                    value="{{ job.salary_from if job and job.salary_from is not none else '' }}">
             <p class="text-xs text-gray-500 mt-1">Optional</p>
           </div>
-
-          <!-- Salary To -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Salary To (USD)</label>
             <input type="number" name="salary_to"
@@ -117,11 +103,9 @@
         </div>
       </section>
 
-      <!-- Section: Description -->
       <section class="bg-white rounded-lg shadow p-6 space-y-6">
         <h2 class="text-lg font-semibold">Description</h2>
         <div class="grid gap-6">
-          <!-- Job Description -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Job Description</label>
             <textarea name="job_description" rows="8"
@@ -129,8 +113,6 @@
                       placeholder="What you'll do, who you'll work with, and how success is measured."
                       required>{% if job %}{{ job.job_description }}{% endif %}</textarea>
           </div>
-
-          <!-- Key Responsibilities -->
           <div>
             <label class="block text-sm font-medium text-gray-700">Key Responsibilities</label>
             <textarea name="key_responsibilities" rows="8"
@@ -140,9 +122,6 @@
           </div>
         </div>
       </section>
-
-
-      <!-- Actions -->
       <div class="flex items-center justify-end gap-2">
         <a href="{{ url_for('company_dashboard') }}" class="btn btn-gray"><i class="fas fa-arrow-left"></i> Cancel</a>
         <button type="submit" class="btn btn-primary">

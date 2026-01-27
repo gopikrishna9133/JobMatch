@@ -14,7 +14,6 @@ def register(app):
 
     @app.route("/register", methods=["GET", "POST"])
     def register():
-        # mirror your original dummy form rendering without WTForms
         class _DummyField:
             def __init__(self, name, ftype="text", value=""):
                 self.name = name; self.type = ftype; self.value = value
@@ -91,7 +90,6 @@ def register(app):
             if not user:
                 flash("Invalid email or password", "danger")
                 return render_template("login.html", form=_DummyForm())
-            # bcrypt (upgrade legacy plaintext if any)
             if user.password.startswith("$2"):
                 valid = bcrypt.check_password_hash(user.password, password)
             else:
@@ -108,8 +106,7 @@ def register(app):
                 return redirect(url_for("seeker_dashboard" if has_bio else "seeker_data"))
             return redirect(url_for("company_dashboard"))
         return render_template("login.html", form=_DummyForm())
-    
-    # Forgot Password
+
     @app.post("/api/forgot/check")
     def api_forgot_check():
         email = (request.form.get("email") or "").strip().lower()
@@ -137,7 +134,6 @@ def register(app):
         if not user:
             return jsonify({"ok": False, "error": "Email not found"}), 404
 
-        # NEW: block if new password equals existing password
         if bcrypt.check_password_hash(user.password, new_pw):
             return jsonify({"ok": False, "error": "New password cannot be the same as your current password"}), 400
 
@@ -154,6 +150,5 @@ def register(app):
     @login_required
     def logout():
         logout_user()
-        # keeping your original flash category
         flash("You have been logged out.", "danger")
         return redirect(url_for("login"))

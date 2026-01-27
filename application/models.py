@@ -73,7 +73,7 @@ class RejectedApplication(db.Model):
 class Resource(db.Model):
     __tablename__ = "resources"
     id          = db.Column(db.Integer, primary_key=True)
-    resource_type = db.Column(db.String(20), nullable=False)  # Video | Book | Website
+    resource_type = db.Column(db.String(20), nullable=False)
     title       = db.Column(db.String(200), nullable=False)
     url         = db.Column(db.String(500), nullable=False)
     description = db.Column(db.Text)

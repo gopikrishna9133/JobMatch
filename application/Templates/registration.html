@@ -124,7 +124,6 @@
       <form method="POST" novalidate>
         {{ form.hidden_tag() }}
 
-        <!-- Full Name -->
         <label>Full Name</label>
         <div class="field">
           <i class="fa-regular fa-user icon"></i>
@@ -132,7 +131,6 @@
         </div>
         <div id="err_name" class="error" aria-live="polite">Full name must be at least 3 characters.</div>
 
-        <!-- Email -->
         <label style="margin-top:12px;">Email Address</label>
         <div class="field">
           <i class="fa-regular fa-envelope icon"></i>
@@ -140,7 +138,6 @@
         </div>
         <div id="err_email" class="error" aria-live="polite">Please enter a valid email address.</div>
 
-        <!-- Password -->
         <label style="margin-top:12px;">Password</label>
         <div class="field">
           <i class="fa-solid fa-lock icon"></i>
@@ -153,7 +150,6 @@
         <div class="helper">Use at least 6 characters. Stronger if 8+ with A-Z, a-z, 0-9, and a symbol.</div>
         <div id="err_password" class="error" aria-live="polite">Password must be at least 6 characters.</div>
 
-        <!-- Role -->
         {{ form.role(type="hidden", id="role") }}
         <label style="margin-top:14px;">I want to join as:</label>
         <div class="role-wrap" id="roleWrap">
@@ -179,7 +175,6 @@
   </section>
 
   <script>
-    // --- Password toggle ---
     function togglePw(){
       const input = document.getElementById('password');
       const icon  = document.getElementById('pwIcon');
@@ -188,7 +183,6 @@
       else{                        input.type = 'password'; icon.classList.replace('fa-eye-slash','fa-eye'); }
     }
 
-    // --- Password strength meter ---
     (function initPwMeter(){
       const pw  = document.getElementById('password');
       const bar = document.getElementById('meterBar');
@@ -228,7 +222,6 @@
       roleInput.value = '';
       roleCards.forEach(c => c.classList.remove('active'));
 
-      // Helpers
       const show = el => { if(el) el.style.display = 'block'; };
       const hide = el => { if(el) el.style.display = 'none'; };
 
@@ -247,12 +240,10 @@
         submit.disabled = !ok;
       }
 
-      // Live validation
       nameEl.addEventListener('input', validateName);
       emailEl.addEventListener('input', validateEmail);
       pwEl.addEventListener('input', validatePw);
 
-      // Role interactions
       function setRole(val){
         roleCards.forEach(c => c.classList.toggle('active', c.dataset.role === val));
         roleInput.value = val;
@@ -265,11 +256,9 @@
         });
       });
 
-      // On load, ensure errors hidden and button gated
       hide(errName); hide(errEmail); hide(errPw); hide(errRole);
       gate();
 
-      // Prevent submit if somehow clicked while invalid (safety)
       document.querySelector('form[method="POST"]').addEventListener('submit', (e)=>{
         if(submit.disabled) e.preventDefault();
       });

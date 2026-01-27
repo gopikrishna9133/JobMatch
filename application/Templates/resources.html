@@ -30,7 +30,6 @@
 </head>
 <body class="bg-gray-50 font-[Inter] text-gray-900">
 <div class="min-h-screen flex flex-col">
-    <!-- Navigation -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center">
@@ -54,7 +53,6 @@
     </nav>
 
     <script>
-        // Role-aware Dashboard button
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('dashboard-btn');
             if (btn) {
@@ -69,7 +67,6 @@
     </script>
 
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             <div id="flash-stack" class="space-y-3 mb-6">
@@ -108,8 +105,6 @@
             </script>
           {% endif %}
         {% endwith %}
-
-        <!-- Video Resources Section -->
         <section class="mb-12">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">
@@ -176,7 +171,6 @@
             {% endif %}
         </section>
 
-        <!-- Books Section -->
         <section class="mb-12">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">
@@ -243,7 +237,6 @@
             {% endif %}
         </section>
 
-        <!-- Websites Section -->
         <section>
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900">
@@ -307,7 +300,6 @@
 </div>
 
 <script>
-  // Animate resource cards on reveal
   document.addEventListener('DOMContentLoaded', function() {
       const obs = new IntersectionObserver((entries) => {
           entries.forEach(e => {

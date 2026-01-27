@@ -92,7 +92,6 @@
       </div>
 
       <div class="card-bd">
-        <!-- BEGIN: Seeker Data Form -->
         <form method="POST" enctype="multipart/form-data" action="{{ url_for('seeker_data') }}" class="space-y-6">
 
           <div class="row two">
@@ -152,13 +151,11 @@
           </div>
 
         </form>
-        <!-- END: Seeker Data Form -->
       </div>
     </div>
   </main>
 
   <script>
-    // consistent input sizing on page load
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('input, select, textarea').forEach(el => {
         el.classList.add('text-[0.95rem]');

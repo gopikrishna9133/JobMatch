@@ -18,7 +18,6 @@ def register(app):
     def company_dashboard():
         return render_template("company_dashboard.html")
 
-    # Back-compat + primary post creation route
     @app.route("/postcreation", methods=["GET", "POST"], endpoint="postcreation")
     @app.route("/post_creation", methods=["GET", "POST"])
     @login_required

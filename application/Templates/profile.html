@@ -19,7 +19,6 @@
 </head>
 <body class="bg-gray-50 font-[Inter] text-gray-900">
   <div class="min-h-screen">
-    <!-- NAV -->
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="h-16 flex items-center justify-between">
@@ -40,8 +39,6 @@
     </nav>
 
     <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-      <!-- Flash messages -->
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           <div id="flashWrap" class="space-y-2 mb-6">
@@ -79,8 +76,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Details panel -->
         <section id="panelDetails" class="p-6">
           <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data" class="space-y-6">
             <input type="hidden" name="action" value="details"/>
@@ -135,7 +130,6 @@
               </div>
 
             {% else %}
-              <!-- Employer fields -->
               <div class="grid sm:grid-cols-2 gap-6">
                 <div>
                   <label class="block text-sm font-medium text-gray-700">Contact Name</label>
@@ -171,8 +165,6 @@
             </div>
           </form>
         </section>
-
-        <!-- Password panel -->
         <section id="panelPassword" class="p-6 hidden">
           <form method="POST" action="{{ url_for('profile') }}" class="space-y-6">
             <input type="hidden" name="action" value="password"/>
@@ -207,7 +199,6 @@
   </div>
 
   <script>
-    // Tabs
     const tabDetails = document.getElementById('tabDetails');
     const tabPassword = document.getElementById('tabPassword');
     const panelDetails = document.getElementById('panelDetails');
@@ -223,8 +214,6 @@
     tabDetails.addEventListener('click', ()=>setTab('details'));
     tabPassword.addEventListener('click', ()=>setTab('password'));
     setTab('details');
-
-    // Auto-dismiss flash after 4s
     const wrap = document.getElementById('flashWrap');
     if (wrap){
       setTimeout(()=>{ wrap.querySelectorAll('.flash').forEach(el=>el.remove()); }, 4000);

@@ -8,15 +8,15 @@
 
   <style>
     :root{
-      --primary:#3b82f6;        /* blue-500 */
-      --primary-600:#2563eb;    /* blue-600 */
+      --primary:#3b82f6;
+      --primary-600:#2563eb;
       --surface:#ffffff;
-      --bg:#f1f5f9;            /* slate-100 */
-      --text:#0f172a;          /* slate-900 */
-      --muted:#64748b;         /* slate-500 */
-      --line:#e2e8f0;          /* slate-200 */
-      --user:#e0e7ff;          /* indigo-100 */
-      --bot:#f8fafc;           /* slate-50  */
+      --bg:#f1f5f9;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e2e8f0;
+      --user:#e0e7ff;
+      --bot:#f8fafc;
       --shadow:0 10px 25px rgba(0,0,0,.08);
     }
 
@@ -105,12 +105,10 @@
     .send:disabled{ background:#cbd5e1; cursor:not-allowed }
     .send:hover:not(:disabled){ background:var(--primary-600); transform:translateY(-1px) }
 
-    /* scrollbar */
     .chat-messages::-webkit-scrollbar{ width:8px }
     .chat-messages::-webkit-scrollbar-thumb{ background:#cbd5e1; border-radius:6px }
     .chat-messages::-webkit-scrollbar-track{ background:#f8fafc }
 
-    /* Exit confirm modal */
     .modal{
       position:fixed; inset:0; background:rgba(15,23,42,.5); display:none; align-items:center; justify-content:center; padding:16px; z-index:50;
     }
@@ -135,7 +133,6 @@
 <body>
 
   <div class="chat-wrap">
-    <!-- Left: mini profile / helper panel -->
     <aside class="profile-card">
       <div class="profile-row">
         <div class="avatar"><i class="fa-solid fa-robot"></i></div>
@@ -152,7 +149,6 @@
       </div>
     </aside>
 
-    <!-- Right: chat -->
     <section class="chat-container">
       <header class="chat-header">
         <div class="chat-title"><i class="fa-solid fa-comments"></i> <span>Chat</span></div>
@@ -168,7 +164,6 @@
     </section>
   </div>
 
-  <!-- Exit Confirmation Modal -->
   <div id="exitModal" class="modal" aria-hidden="true">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exitTitle">
       <div class="modal-hd">
@@ -188,19 +183,16 @@
   <script>
     const userRole = "{{ current_user.role if current_user else '' }}";
 
-    // Elements
     const chatMessages = document.getElementById('chat-messages');
     const messageInput = document.getElementById('message-input');
     const sendBtn = document.getElementById('send-btn');
     const exitBtn = document.getElementById('exit-chat');
 
-    // Modal elements
     const exitModal = document.getElementById('exitModal');
     const exitClose = document.getElementById('exitClose');
     const cancelExit = document.getElementById('cancelExit');
     const confirmExit = document.getElementById('confirmExit');
 
-    // Initial greeting
     setTimeout(()=> addMessage("Hello! How can I assist you today?", "bot"), 400);
 
     messageInput.addEventListener('input', ()=> {
@@ -215,7 +207,6 @@
     });
     sendBtn.addEventListener('click', sendMessage);
 
-    // Exit
     exitBtn.addEventListener('click', openExitConfirm);
     exitClose.addEventListener('click', closeExitConfirm);
     cancelExit.addEventListener('click', closeExitConfirm);
@@ -240,7 +231,6 @@
       exitModal.setAttribute('aria-hidden','true');
     }
 
-    // Chat helpers
     function addMessage(text, who){
       const msg = document.createElement('div');
       msg.className = `message ${who}`;
@@ -264,7 +254,6 @@
     }
     function scrollToBottom(){ chatMessages.scrollTop = chatMessages.scrollHeight; }
 
-    // Send to Flask backend
     function sendMessage(){
       const message = messageInput.value.trim();
       if(!message) return;
@@ -297,7 +286,6 @@
         .replaceAll('>','&gt;');
     }
 
-    // focus input on load
     messageInput.focus();
   </script>
 </body>

@@ -16,24 +16,17 @@ from ..models import (
 from ..services.offer_service import render_offer_letter, render_template
 from ..utils.security import seeker_required
 from ..utils.file_utils import allowed_file, random_filename
-from .. import bcrypt  # bcrypt is initialized in application/__init__.py
-
+from .. import bcrypt
 logger = logging.getLogger(__name__)
 
 
 def register(app):
-    # -------------------------------------------------
-    # Seeker Dashboard (shell; lists load via /api)
-    # -------------------------------------------------
     @app.route("/seeker_dashboard")
     @login_required
     @seeker_required
     def seeker_dashboard():
         return render_template("seeker_dashboard.html")
 
-    # -------------------------------------------------
-    # Seeker Bio (initial form used by old flow)
-    # -------------------------------------------------
     @app.route("/seeker_data", methods=["GET", "POST"])
     @login_required
     @seeker_required
@@ -65,9 +58,6 @@ def register(app):
         info = SeekerData.query.filter_by(email=current_user.email).first()
         return render_template("seekerdata.html", seeker=info)
 
-    # -------------------------------------------------
-    # Unified Profile (view + edit + password)
-    # -------------------------------------------------
     @app.route("/profile", methods=["GET", "POST"])
     @login_required
     def profile():
@@ -86,7 +76,6 @@ def register(app):
                     sd.experience = request.form.get("experience") or sd.experience
                     sd.skills = request.form.get("skills") or sd.skills
 
-                    # Optional resume upload
                     resume_file = request.files.get("resume")
                     if resume_file and allowed_file(resume_file.filename):
                         if sd.resume_path:
@@ -98,7 +87,6 @@ def register(app):
                         resume_file.save(os.path.join(app.config["UPLOAD_FOLDER"], newname))
                         sd.resume_path = newname
 
-                    # Keep display name in sync
                     current_user.name = sd.full_name
                 else:
                     cd = CompanyData.query.filter_by(email=current_user.email).first()
@@ -143,7 +131,6 @@ def register(app):
 
             return redirect(url_for("profile"))
 
-        # GET -> render profile page with role-specific data
         if current_user.role == "seeker":
             sd = SeekerData.query.filter_by(email=current_user.email).first()
             resume_url = None
@@ -186,9 +173,6 @@ def register(app):
         flash("Resume not found", "danger")
         return redirect(url_for("company_dashboard" if current_user.role == "company" else "seeker_dashboard"))
 
-    # -------------------------------------------------
-    # Job listings page (Apply disabled if already applied)
-    # -------------------------------------------------
     @app.route("/applications", methods=["GET"], endpoint="applications")
     @app.route("/job_listings", methods=["GET"], endpoint="job_listings")
     @login_required
@@ -218,7 +202,6 @@ def register(app):
 
         jobs = query.all()
 
-        # -------- compute “already has a status” sets (email-based schema) --------
         user_email = current_user.email
 
         act = ActiveApplication.query.filter_by(seeker_email=user_email).all()
@@ -226,37 +209,28 @@ def register(app):
         rej = RejectedApplication.query.filter_by(seeker_email=user_email).all()
 
         def resolve_job_id(row):
-            # Prefer job_post_id column if it exists in your table
             jid = getattr(row, "job_post_id", None)
             if jid:
                 return jid
-            # Fallback: best-effort by title (for legacy rows that store only title)
             j = JobPost.query.filter_by(job_title=row.job_title).first()
             return j.id if j else None
 
-        # set of job IDs with *any* status
         applied_ids = {
             jid for rows in (act, acc, rej) for jid in (resolve_job_id(r) for r in rows) if jid
         }
-        # set of titles as a secondary safety net (in case ID not stored)
         applied_titles = {
             r.job_title for rows in (act, acc, rej) for r in rows if getattr(r, "job_title", None)
         }
-        # -------------------------------------------------------------------------
 
         return render_template(
             "applications.html",
             jobs=jobs,
             applied_ids=applied_ids,
-            applied_titles=applied_titles  # <- new
+            applied_titles=applied_titles
         )
 
-
-    # -------------------------------------------------
-    # Apply for a job (canonical + legacy alias)
-    # -------------------------------------------------
     @app.route("/apply/<int:job_post_id>", methods=["POST"], endpoint="apply_for_job")
-    @app.route("/apply_job/<int:job_post_id>", methods=["POST"], endpoint="apply_job")  # keep old templates working
+    @app.route("/apply_job/<int:job_post_id>", methods=["POST"], endpoint="apply_job")
     @login_required
     @seeker_required
     def apply_for_job(job_post_id):
@@ -266,7 +240,6 @@ def register(app):
         user_email = current_user.email
         user_name = current_user.name
 
-        # Duplicate check
         existing = ActiveApplication.query.filter_by(
             seeker_email=user_email, job_post_id=job_post_id
         ).first()
@@ -316,9 +289,6 @@ def register(app):
 
         return redirect(url_for("applications"))
 
-    # -------------------------------------------------
-    # Dashboard data API (accepted / rejected / under review)
-    # -------------------------------------------------
     @app.route("/api/seeker_status", methods=["GET"])
     @login_required
     @seeker_required
@@ -335,7 +305,6 @@ def register(app):
         def pack_rows(raw, status_key):
             out = []
             for r in raw:
-                # Enrich with job details by title
                 job = JobPost.query.filter_by(job_title=r.job_title).first()
                 out.append({
                     "job_title": r.job_title,
@@ -379,22 +348,18 @@ def register(app):
     @seeker_required
     def offer_letter():
         from flask import make_response, request
-        # import that works across layouts
         try:
             from ..services.offer_service import render_offer_letter
         except Exception:
             try:
                 from ..offer_service import render_offer_letter
             except Exception:
-                # last-ditch absolute import if your app uses top-level package
                 from application.offer_service import render_offer_letter
 
-        # Prefer job_post_id; fall back to job_title if needed
         job_post_id = request.args.get("job_post_id", type=int)
         job_title   = request.args.get("job_title") or request.args.get("title")
         applied_at  = request.args.get("applied_at", "")
 
-        # Render HTML and get a nice filename from your service
         html, filename = render_offer_letter(
             seeker=current_user,
             job_post_id=job_post_id,
