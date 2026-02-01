@@ -1,27 +1,30 @@
 import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-ROOT_DIR = os.path.dirname(BASE_DIR)
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+DB_PATH = os.path.join(ROOT_DIR, "database.db")
 
-class Config:
+class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret")
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_FOLDER = os.path.join(ROOT_DIR, "uploads")
+    MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 10 * 1024 * 1024))
 
+class DevConfig(BaseConfig):
+    ENV = "development"
+    DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "SQLALCHEMY_DATABASE_URI",
-        f"sqlite:///{os.path.join(ROOT_DIR, 'database', 'users.db')}"
+        f"sqlite:///{DB_PATH}"
     )
 
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
-
-    MAX_CONTENT_LENGTH = int(os.environ.get("MAX_CONTENT_LENGTH", 10 * 1024 * 1024))  # 10MB
-
-class DevConfig(Config):
-    DEBUG = True
-
-class ProdConfig(Config):
+class ProdConfig(BaseConfig):
+    ENV = "production"
     DEBUG = False
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "SQLALCHEMY_DATABASE_URI",
+        f"sqlite:///{DB_PATH}"
+    )
 
 def get_config():
     env = os.environ.get("FLASK_ENV", "development").lower()
