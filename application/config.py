@@ -2,7 +2,7 @@ import os
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
-DB_PATH = os.path.join(ROOT_DIR, "database.db")
+DB_PATH = os.path.join(ROOT_DIR, "database/users.db")
 
 class BaseConfig:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev_secret")
