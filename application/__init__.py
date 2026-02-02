@@ -13,6 +13,8 @@ def create_app():
     login_manager.init_app(app)
     login_manager.login_view = "login"
 
+    from .models import User
+
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
@@ -21,9 +23,7 @@ def create_app():
 
     with app.app_context():
         from . import models
-
-        if app.config.get("ENV") != "production":
-            db.create_all()
+        db.create_all()
 
     from .routes import (
         common_routes,
