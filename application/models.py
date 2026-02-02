@@ -2,6 +2,7 @@ from flask_login import UserMixin
 from .database import db
 from datetime import datetime
 
+
 class User(db.Model, UserMixin):
     __tablename__ = "users"
     id = db.Column(db.Integer, primary_key=True)

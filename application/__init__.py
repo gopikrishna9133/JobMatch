@@ -2,7 +2,6 @@ import os
 from flask import Flask
 from .config import get_config
 from .database import db, bcrypt, login_manager
-from .models import User
 
 def create_app():
     app = Flask(__name__, static_folder="static", template_folder="templates")
